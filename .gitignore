@@ -5,6 +5,8 @@
 
 # Ignore temp file in mattergen/lisa
 lisa/temp.xyz
+# Ignore the results folder in the repo root
+results/
 
 # User-specific files
 *.rsuser
