@@ -59,17 +59,45 @@ class MatterGenCheckpointInfo:
         model_name: PRETRAINED_MODEL_NAME,
         repository_name: str = "microsoft/mattergen",
         config_overrides: list[str] = None,
+        hf_mirror_url = "https://hf-mirror.com" # add endpoint for hf mirror
     ):
         """
         Instantiate a MatterGenCheckpointInfo object from a model hosted on the Hugging Face Hub.
-
+        Tries the original repo first, then the mirror if provided and the original fails.
         """
-        hf_hub_download(
-            repo_id=repository_name, filename=f"checkpoints/{model_name}/checkpoints/last.ckpt"
-        )
-        config_path = hf_hub_download(
-            repo_id=repository_name, filename=f"checkpoints/{model_name}/config.yaml"
-        )
+        try:
+            hf_hub_download(
+                repo_id=repository_name,
+                filename=f"checkpoints/{model_name}/checkpoints/last.ckpt",
+            )
+            config_path = hf_hub_download(
+                repo_id=repository_name,
+                filename=f"checkpoints/{model_name}/config.yaml",
+            )
+        except Exception as e:
+            print(f"Error downloading from original repo: {e}")
+            if hf_mirror_url:
+                print(f"Trying to download from mirror repository at {hf_mirror_url}.")
+                try:
+                    hf_hub_download(
+                        repo_id=repository_name,
+                        filename=f"checkpoints/{model_name}/checkpoints/last.ckpt",
+                        endpoint=hf_mirror_url,
+                    )
+                    config_path = hf_hub_download(
+                        repo_id=repository_name,
+                        filename=f"checkpoints/{model_name}/config.yaml",
+                        endpoint=hf_mirror_url,
+                    )
+                    print(f"Downloaded from mirror.")
+
+                except Exception as mirror_e:
+                    raise RuntimeError(
+                        f"Failed to download from both original ({e}) and mirror ({mirror_e}) repositories."
+                    )
+            else:
+                raise
+
         return cls(
             model_path=Path(config_path).parent,
             config_overrides=config_overrides or [],
