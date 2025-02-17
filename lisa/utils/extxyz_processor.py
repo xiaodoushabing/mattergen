@@ -86,7 +86,7 @@ def conv_results(structures_path, preview = False):
     return long_results, short_results_df
 
 # %%
-def pick_results(idx, long_results, structure_path, visualise = True):
+def pick_results(idx, long_results, structure_path, repeat_unit=3, visualise = True):
     """Selects a specific structure from the parsed data and writes it to a file,
     optionally visualizing it.
 
@@ -106,4 +106,4 @@ def pick_results(idx, long_results, structure_path, visualise = True):
         f.write(f"{long_results[idx]['lattice']}\n")
         f.writelines("\n".join(long_results[idx]['data']) + "\n")
     if visualise:
-        _ = visualise_structure(structure_path)
+        _ = visualise_structure(structure_path,repeat_unit=repeat_unit)
