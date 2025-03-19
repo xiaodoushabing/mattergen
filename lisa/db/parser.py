@@ -115,7 +115,6 @@ def update_lattice(model_results_dir, batch_id):
     """
 
     # Parse into structured JSON
-
     structures_path = f"{model_results_dir}generated_crystals.extxyz"
     lattices_data = _parse_extxyz_to_json(structures_path)
     
@@ -139,6 +138,12 @@ def update_lattice(model_results_dir, batch_id):
     session.close()
 
 def add_data(model_results_dir):
+    """
+    Adds batch and lattice data to the database based on the provided directory.
+
+    Args:
+        model_results_dir (str): The directory containing the model results.
+    """
     batch_id = update_batch(model_results_dir)
     if batch_id:
         update_lattice(model_results_dir, batch_id)
