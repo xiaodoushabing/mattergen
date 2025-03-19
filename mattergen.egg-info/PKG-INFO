@@ -41,3 +41,7 @@ Requires-Dist: torch_scatter
 Requires-Dist: torch_sparse
 Requires-Dist: tqdm
 Requires-Dist: wandb>=0.10.33
+Requires-Dist: sqlalchemy
+Requires-Dist: psycopg2
+Requires-Dist: alembic
+Requires-Dist: python-dotenv

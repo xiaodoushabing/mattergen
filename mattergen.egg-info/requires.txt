@@ -29,6 +29,10 @@ torch_scatter
 torch_sparse
 tqdm
 wandb>=0.10.33
+sqlalchemy
+psycopg2
+alembic
+python-dotenv
 
 [:sys_platform == "darwin"]
 torch==2.4.1

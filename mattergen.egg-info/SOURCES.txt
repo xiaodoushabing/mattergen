@@ -141,3 +141,4 @@ mattergen/tests/test_diffusion_instantiation.py
 mattergen/tests/test_generator.py
 mattergen/tests/test_mattergen_denoiser.py
 mattergen/tests/test_sde_lib.py
+mattergen/tests/test_structure_matcher.py
