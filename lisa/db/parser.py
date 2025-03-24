@@ -154,7 +154,8 @@ def add_data(model_results_dir):
 #%%
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python script_name.py <model_name>")
+        print("Usage: python script_name.py <model_results_directory>")
+        # sample model_results_directory: ../results/dft_mag_density_3_3/
         sys.exit(1)
 
     model_results_dir = sys.argv[1]
