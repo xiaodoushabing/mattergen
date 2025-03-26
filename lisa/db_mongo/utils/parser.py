@@ -53,7 +53,6 @@ def parse_extxyz_to_json(structures_path):
                 atoms_data[index] = {atom: list(map(float, split_data[1:]))}
             
             lattices.append({
-                "lattice_idx": idx,
                 "no_of_atoms": atom_count,
                 "cell_params": cell_params,
                 "pbc": pbc,
