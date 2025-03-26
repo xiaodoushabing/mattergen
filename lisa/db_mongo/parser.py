@@ -46,13 +46,14 @@ def parse_extxyz_to_json(structures_path):
             pbc[0] = pbc[0].split("=")[-1]
             pbc = "".join(pbc)
 
-            for idx, data in enumerate(datas, start=1):
+            for index, data in enumerate(datas, start=1):
                 split_data = data.split()
                 atom = split_data[0]
                 atom_list[atom] = atom_list.get(atom, 0) + 1
-                atoms_data[idx] = {atom: list(map(float, split_data[1:]))}
+                atoms_data[index] = {atom: list(map(float, split_data[1:]))}
             
             lattices.append({
+                "lattice_idx": idx,
                 "no_of_atoms": atom_count,
                 "cell_params": cell_params,
                 "pbc": pbc,
@@ -60,20 +61,24 @@ def parse_extxyz_to_json(structures_path):
                 "atoms": atoms_data,
             })
             i += 2 + atom_count
+            idx += 1
         
         except IndexError as e:
             print(f"ERROR: IndexError encountered while parsing lattice at line {i + 1}. || {e}")
             i += 1
+            idx += 1
             continue
 
         except ValueError as e:
             print(f"ERROR: ValueError encountered while parsing lattice at line {i + 1}. || {e}")
             i += 1
+            idx += 1
             continue
 
         except Exception as e:
             print(f"ERROR: Unexpected error encountered while parsing lattice at line {i + 1}. || {e}")
             i += 1
+            idx += 1
             continue
 
     return lattices

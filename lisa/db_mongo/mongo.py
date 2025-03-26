@@ -65,8 +65,9 @@ def add_data(model_results_dir):
             raise
 
         # insert lattices into MongoDB
-        for (idx, lattice) in enumerate(lattices_data, start=1):
+        for lattice in lattices_data:
             lattice_doc = {
+                "lattice_index": lattice["lattice_idx"],
                 "guidance_factor": guidance_factor,
                 "magnetic_density": magnetic_density,
                 "file_path": model_results_dir,
@@ -81,9 +82,9 @@ def add_data(model_results_dir):
                 print(f"Lattice document to insert: {lattice_doc}")
 
                 lattice_collection.insert_one(lattice_doc)
-                print(f"Successfully inserted lattice {idx} for {model_results_dir}")
+                print(f"Successfully inserted lattice {lattice["lattice_idx"]} for {model_results_dir}")
             except Exception as e:
-                print(f"ERROR: Failed to insert lattice {idx} into MongoDB for {model_results_dir}: {e}")
+                print(f"ERROR: Failed to insert lattice {lattice["lattice_idx"]} into MongoDB for {model_results_dir}: {e}")
                 raise
     except Exception as e:
         print(f"ERROR: {e}")
