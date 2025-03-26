@@ -37,7 +37,7 @@ for md in "${mag_density[@]}"; do
     RESULTS_PATH="${BASE_RESULTS_PATH}_${md}_${gf}"
 
     # Print the command that will be executed (for debugging)
-    echo "Running: mattergen-generate ${RESULTS_PATH} --pretrained-name=${MODEL_NAME} --batch_size=${BATCH_SIZE} --properties_to_condition_on='{\"${CONDITION_PROPERTY}\": ${mag_density}}' --diffusion_guidance_factor=${guidance_factor}"
+    echo "Running: mattergen-generate ${RESULTS_PATH} --pretrained-name=${MODEL_NAME} --batch_size=${BATCH_SIZE} --properties_to_condition_on='{\"${CONDITION_PROPERTY}\": ${md}}' --diffusion_guidance_factor=${gf}"
 
     # Execute the mattergen-generate command
     mattergen-generate "${RESULTS_PATH}" \
@@ -50,7 +50,7 @@ for md in "${mag_density[@]}"; do
     
     count=$((count+1))
     echo "Completed ${count}/${total_permutations} permutations"
-    echo "--------------------------------------------------"
+    echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
   done
 done
 
