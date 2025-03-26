@@ -9,6 +9,7 @@ from datetime import datetime
 from utils.parser import parse_extxyz_to_json
 from utils.mattersim import mattersim_prediction
 
+## ensure files are stored in the format: dft_mag_density_<magnetic density>_<guidance factor>
 #%%
 load_dotenv()
 mongo_host = os.environ.get("MONGO_HOST")
