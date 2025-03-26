@@ -1,9 +1,8 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey, DateTime, JSON
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.orm import relationship
 import datetime
 
 load_dotenv()
@@ -20,6 +19,7 @@ class Batch(Base):
     added_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     # One-to-many relationship: a batch has multiple lattices
+    # relationship = relationshio(RelatedClass, BidirectionalRelationship )
     lattices = relationship("Lattice", back_populates="batch")
 
 class Lattice(Base):
