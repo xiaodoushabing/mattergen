@@ -3,7 +3,6 @@ from pymongo import MongoClient
 import os, sys
 from dotenv import load_dotenv
 import re
-from datetime import datetime
 
 # os.path.join(os.path.dirname(__file__), "/utils")
 from utils.parser import parse_extxyz_to_json
@@ -128,7 +127,7 @@ def add_data(model_results_dir, cal_mattersim=True, model=5):
         client.close()
         print("MongoDB connection closed.")
 
-
+#%% 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         single_result_dir = sys.argv[1]
@@ -192,5 +191,3 @@ if __name__ == "__main__":
         # Example of model_results_directory for single inference: ../results/dft_mag_density_3_3/
         # Example of batch_directory for batch inference: ../results/
         sys.exit(1)
-
-#%%

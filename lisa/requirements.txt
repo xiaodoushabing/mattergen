@@ -1,0 +1,6 @@
+alembic==1.15.1
+fastapi==0.115.12
+mattersim
+pymongo==4.11.3
+SQLAlchemy==2.0.39
+uvicorn==0.34.0
