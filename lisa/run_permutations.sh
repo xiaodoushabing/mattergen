@@ -23,8 +23,8 @@ BATCH_SIZE=64
 CONDITION_PROPERTY='dft_mag_density'
 
 # Define the permutations of magnetic density and guidance factor
-mag_density=(0.5 1.0 2.0 3.0 4.0 5.0)
-guidance_factor=(1.0 2.0 3.0 4.0 5.0)
+mag_density=(0.5 1.0 1.5 2.0 2.5 3.0 4.0 5.0 6.0 )
+guidance_factor=(1.0 1.5 2.0 2.5 3.0 2.5 4.0 5.0 6.0)
 
 num_mag_density=${#mag_density[@]}
 num_guidance_factor=${#guidance_factor[@]}
