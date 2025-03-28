@@ -80,14 +80,17 @@ def add_data(model_results_dir, cal_mattersim=True, model=5):
             raise
 
         if cal_mattersim:
+            flag = False
             print(f"Starting Mattersim predictions...")
             try: 
                 ms_predictions = mattersim_prediction(structures_path, model=model)
+                flag = True
                 print(f"Mattersim predictions completed.")
             except Exception as e:
                 print(f"ERROR: Failed to run MatterSim predictions. Error: {e}")
                 print("Proceeding without Mattersim predictions")
                 ms_predictions = None
+                
 
         # insert lattices into MongoDB
         for (index, lattice) in enumerate(lattices_data, start=1):
@@ -111,9 +114,8 @@ def add_data(model_results_dir, cal_mattersim=True, model=5):
                 }
             try:
                 # print(f"Lattice document to insert: {lattice_doc}")
-
                 lattice_collection.insert_one(lattice_doc)
-                print(f"Successfully inserted lattice {index} for {model_results_dir}")
+                print(f"Successfully inserted lattice {index} for {model_results_dir}. With mattersim predictions: {flag}")
             except Exception as e:
                 print(f"ERROR: Failed to insert lattice {index} into MongoDB for {model_results_dir}: {e}")
                 raise
@@ -146,6 +148,8 @@ if __name__ == "__main__":
     
     elif len(sys.argv) == 3 and sys.argv[1] == "batch":
         batch_results_dir = sys.argv[2]
+        fail_holder = []
+
         if not os.path.isdir(batch_results_dir):
             print(f"The provided batch directory is not valid: {batch_results_dir}")
             sys.exit(1)
@@ -153,21 +157,33 @@ if __name__ == "__main__":
         try:
             folders = os.listdir(batch_results_dir)
             model_name="dft_mag_density"
-            for folder in folders:
+            num_folders = len(folders)
+            success_count = 0
+            for (idx, folder) in enumerate(folders, start=1):
+                print(f"Processing folder {idx}/{num_folders}")
                 single_result_dir = os.path.join(batch_results_dir, folder)
                 if os.path.isdir(single_result_dir):
                     print(f"Processing {single_result_dir}")
                     try:
                         add_data(single_result_dir)
+                        success_count+=1
                     except Exception as e:
+                        fail_holder.append(single_result_dir)
                         print(f"ERROR: An error occured while processing {single_result_dir}: {e}")
-                        sys.exit(1)
                     print(f"Successfully processed {single_result_dir}")
+                    print("------------------------------------------------------------------------------------------------------------------------")
                 else:
+                    fail_holder.append(single_result_dir)
                     print(f"{folder} is not a directory.")
         except Exception as e:
             print(f"ERROR: An error occurred during data processing: {e}")
             sys.exit(1)
+
+        print(f"{success_count}/{num_folders} folders succesfully processed.")
+        if fail_holder:
+            print(f"Directories that failed to process: {fail_holder}")
+        else:
+            print("All directories processed successfully.")
         sys.exit(0)
 
     else:
@@ -176,3 +192,5 @@ if __name__ == "__main__":
         # Example of model_results_directory for single inference: ../results/dft_mag_density_3_3/
         # Example of batch_directory for batch inference: ../results/
         sys.exit(1)
+
+#%%
