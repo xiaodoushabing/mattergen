@@ -70,7 +70,7 @@ def add_data(model_results_dir, cal_mattersim=True, model=5):
             raise
 
         # parse .extxyz into structured JSON
-        structures_path = f"{model_results_dir}generated_crystals.extxyz"
+        structures_path = f"{model_results_dir}/generated_crystals.extxyz"
 
         #only parse lattice data, don't do any energy predictions
         lattices_data = parse_extxyz_to_json(structures_path)
@@ -128,15 +128,51 @@ def add_data(model_results_dir, cal_mattersim=True, model=5):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python script_name.py <model_results_directory>")
-        # sample model_results_directory: ../results/dft_mag_density_3_3/
-        sys.exit(1)
+    if len(sys.argv) == 2:
+        single_result_dir = sys.argv[1]
+        if os.path.isdir(single_result_dir):
+            try:
+                add_data(single_result_dir)
+            except Exception as e:
+                print(f"ERROR: An error occurred during data processing of {single_result_dir}: {e}")
+                sys.exit(1)
+            print(f"Successfully processed {single_result_dir}")
+            sys.exit(0)
+        else:
+            print(f"Path given is not a valid directory: {single_result_dir}")
+            print("Single-inference: python script_name.py <single_result_directory>")
+            print("Batch inference: python script_name.py batch <batch_results_directory>")
+            sys.exit(1)
+    
+    elif len(sys.argv) == 3 and sys.argv[1] == "batch":
+        batch_results_dir = sys.argv[2]
+        if not os.path.isdir(batch_results_dir):
+            print(f"The provided batch directory is not valid: {batch_results_dir}")
+            sys.exit(1)
 
-    model_results_dir = sys.argv[1]
-    try:
-        add_data(model_results_dir)
-    except Exception as e:
-        print(f"ERROR: An error occurred during data processing: {e}")
+        try:
+            folders = os.listdir(batch_results_dir)
+            model_name="dft_mag_density"
+            for folder in folders:
+                single_result_dir = os.path.join(batch_results_dir, folder)
+                if os.path.isdir(single_result_dir):
+                    print(f"Processing {single_result_dir}")
+                    try:
+                        add_data(single_result_dir)
+                    except Exception as e:
+                        print(f"ERROR: An error occured while processing {single_result_dir}: {e}")
+                        sys.exit(1)
+                    print(f"Successfully processed {single_result_dir}")
+                else:
+                    print(f"{folder} is not a directory.")
+        except Exception as e:
+            print(f"ERROR: An error occurred during data processing: {e}")
+            sys.exit(1)
+        sys.exit(0)
+
+    else:
+        print("Single-inference: python script_name.py <single_result_directory>")
+        print("Batch inference: python script_name.py batch <batch_results_directory>")
+        # Example of model_results_directory for single inference: ../results/dft_mag_density_3_3/
+        # Example of batch_directory for batch inference: ../results/
         sys.exit(1)
-    sys.exit(0)
