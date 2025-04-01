@@ -56,8 +56,7 @@ def add_data(model_results_dir, cal_mattersim=True, model=5):
         match = re.search(r'_(\d+\.?\d*)_(\d+\.?\d*)$', model_results_dir.rstrip("/"))
 
         if not match:
-            print(f"Magnetic density and guidance factor not extracted from directory name: {model_results_dir}")
-            raise
+            raise ValueError(f"Could not parse magnetic density and guidance factor from: {model_results_dir}")
         
         try:
             magnetic_density = float(match.group(1))
