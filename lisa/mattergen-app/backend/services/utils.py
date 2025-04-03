@@ -6,6 +6,30 @@ from mattersim.datasets.utils.build import build_dataloader
 import re
 #%% define function to extract metadata from input directory
 def extract_metadata(input_dir):
+    """Extracts magnetic density and guidance factor from a directory name.
+
+    Assumes the directory name ends with a pattern like
+    '_<magnetic_density>_<guidance_factor>', where magnetic_density and
+    guidance_factor are int or floating-point numbers. Handles potential trailing
+    slashes in the input directory path.
+
+    Args:
+        input_dir (str): The path to the directory whose name contains the metadata.
+                         Expected format example:
+                         "dft_mag_density_<magnetic density>_<guidance factor>" or
+                         "dft_mag_density_<magnetic density>_<guidance factor>/".
+
+    Returns:
+        tuple[float, float]: A tuple containing the extracted magnetic density
+                             and guidance factor as floats.
+
+    Raises:
+        ValueError: If the directory name does not match the expected pattern
+                    or if the extracted values cannot be converted to floats.
+    """
+    # The directory name should include magnetic density and
+    # guidance factor in the format: "mag_density_guidance_factor"
+    # (e.g., "dft_mag_density_<magnetic density>_<guidance factor>")
     match = re.search(r'_(\d+\.?\d*)_(\d+\.?\d*)$', input_dir.rstrip("/"))
     if not match:
         raise ValueError(f"Could not parse magnetic density and guidance factor from: {input_dir}")
@@ -21,6 +45,29 @@ def extract_metadata(input_dir):
 
 #%%
 def mattersim_prediction(structures_path, model):
+    """Runs MatterSim inference on structures from an extxyz file.
+
+    Loads a specified MatterSim model checkpoint, reads atomic structures
+    using ASE, prepares a dataloader, and performs predictions for energy,
+    forces, and stresses.
+
+    Args:
+        structures_path (str): Path to the .extxyz file containing the atomic
+                               structures.
+        model (str): The size identifier for the MatterSim model (e.g., 1 or 5).
+                     This is used to construct the checkpoint filename like
+                     "MatterSim-v1.0.0-{model}M.pth".
+
+    Returns:
+        dict: A dictionary containing the predicted properties (energy, forces,
+              stresses) for the structures in the input file. The exact structure
+              depends on the `potential.predict_properties` method of MatterSim.
+
+    Raises:
+        FileNotFoundError: If the specified model checkpoint file does not exist.
+        Various ASE/MatterSim/PyTorch errors: If issues occur during file reading,
+                                              model loading, or prediction.
+    """
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Running MatterSim on {device}")
 
@@ -41,18 +88,39 @@ def mattersim_prediction(structures_path, model):
 #%%
 ## ensure files are stored in the format: dft_mag_density_<magnetic density>_<guidance factor>
 def parse_extxyz_to_json(structures_path):
-    """
-    Parses an .extxyz file and returns structured JSON data.
+    """Parses an .extxyz file into a list of dictionaries representing structures.
+
+    Reads an extended XYZ file, processing each frame (structure) into a
+    standardized dictionary format containing metadata and atomic information.
+    Handles common parsing errors for individual frames by printing an error
+    and skipping the problematic frame.
 
     Args:
         structures_path (str): The path to the .extxyz file.
 
     Returns:
-        list: A list of dictionaries, where each dictionary represents a lattice structure.
-              Each dictionary contains keys like 'no_of_atoms', 'cell_params', 'pbc',
-              'atoms_list', and 'atoms'.
-    """
+        list[dict]: A list of dictionaries, where each dictionary represents a
+                    single lattice structure (frame) read from the file.
+                    Each dictionary contains the following keys:
+                    - 'no_of_atoms' (int): Number of atoms in the frame.
+                    - 'cell_params' (list[str]): Lattice vectors (9 values) as strings.
+                    - 'pbc' (str): Periodic boundary conditions (e.g., "TTT").
+                    - 'atoms_list' (dict): Dictionary mapping element symbols (str)
+                                           to their counts (int) in the frame.
+                    - 'atoms' (dict): Dictionary mapping 1-based atom index (int) to
+                                      another dictionary containing the element symbol
+                                      (str) mapped to a list of its coordinates
+                                      ([x, y, z] as floats). Example:
+                                      {1: {'Si': [0.0, 0.0, 0.0]}, 2: {'O': [1.5, 0.0, 0.0]}}
 
+    Raises:
+        OSError: If the file specified by `structures_path` cannot be opened or read.
+        Exception: For unexpected errors during file processing before frame iteration.
+                   Note: IndexError, ValueError, and other Exceptions during the
+                   parsing of *individual frames* are caught, printed, and the
+                   frame is skipped, allowing the function to potentially return
+                   data from valid frames in a partially malformed file.
+    """
     try:
         with open(structures_path, 'r') as f:
             lines = f.read().strip().split("\n")

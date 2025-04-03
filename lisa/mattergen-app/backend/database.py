@@ -3,8 +3,6 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 
-## ensure files are stored in the format: dft_mag_density_<magnetic density>_<guidance factor>
-
 load_dotenv()
 
 mongo_host = os.environ.get("MONGO_HOST")

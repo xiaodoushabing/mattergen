@@ -10,22 +10,30 @@ class StoreService:
     A service class for processing and storing lattice data from model results into a MongoDB collection.
 
     This service handles parsing lattice information from `.extxyz` files within specified
-    directories, extracting metadata from the directory names, and optionally calculating
-    and storing MatterSim energy predictions.
+    directories, extracting metadata (magnetic density, guidance factor) from the
+    directory names, and optionally calculating and storing MatterSim predictions
+    (energy, forces, stresses).
 
     Attributes:
-        lattice_collection (pymongo.collection.Collection): The MongoDB collection to store lattice data.
-        cal_mattersim (bool): Whether to calculate and store MatterSim energy predictions (default: True).
-        model (int): The MatterSim model version to use for predictions (default: 5).
+        lattice_collection (pymongo.collection.Collection): The MongoDB collection instance
+                                                            to store lattice data.
+        cal_mattersim (bool): Flag indicating whether to calculate and store
+                              MatterSim predictions.
+        model (int): The MatterSim model size identifier (e.g., 1 or 5) to use
+                     for predictions. Note: The default is 5 (as defined in deps.py),
+                     adjust in deps.py if a different default is standard.
     """
-    def __init__(self, lattice_collection: collection.Collection, cal_mattersim: bool = True, model: int = 5):
+    def __init__(self, lattice_collection: collection.Collection, cal_mattersim: bool, model: int):
         """
         Initializes the StoreService.
 
         Args:
-            lattice_collection (pymongo.collection.Collection): The MongoDB collection to use for storing lattice data.
-            cal_mattersim (bool, optional): Whether to calculate and store MatterSim energy predictions. Defaults to True.
-            model (int, optional): The MatterSim model version to use for predictions. Defaults to 5.
+            lattice_collection (pymongo.collection.Collection): The MongoDB collection
+                instance for storing lattice data.
+            cal_mattersim (bool, optional): Whether to calculate and store MatterSim
+                predictions.
+            model (int, optional): The MatterSim model size identifier to use for
+                predictions.
         """
         self.lattice_collection= lattice_collection
         self.cal_mattersim = cal_mattersim
@@ -33,23 +41,34 @@ class StoreService:
 
     def add_data(self, model_results_dir: str):
         """
-        Processes model-generated results from a directory, parses lattice data, and stores it in MongoDB.
+        Processes results from a directory, parses lattice data, and stores it in MongoDB.
 
-        Extracts magnetic density and guidance factor from the directory name. Parses the
-        `.extxyz` file to retrieve lattice data. Inserts each lattice as a document into the
-        configured MongoDB collection. Optionally runs MatterSim energy predictions if `cal_mattersim`
-        is True and stores the results.
+        Extracts magnetic density and guidance factor from the directory name (expected
+        format: "..._<mag_density>_<guidance_factor>"). Parses the
+        'generated_crystals.extxyz' file within the directory to retrieve lattice structures.
+        Inserts each structure as a document into the configured MongoDB collection.
+
+        If `cal_mattersim` is True, it attempts to run MatterSim predictions (energy,
+        forces, stresses) using the configured model and adds them to the document.
+        MatterSim prediction failures are logged but do not stop the insertion process
+        (data will be inserted without predictions in case of failure).
 
         Args:
             model_results_dir (str): Path to the directory containing the model results.
-                                     The directory name should include magnetic density and
-                                     guidance factor in the format: "mag_density_guidance_factor"
-                                     (e.g., "0.5_1.0").
+                The directory name must end with '_<float>_<float>' representing
+                magnetic density and guidance factor respectively
+                (e.g., "dft_mag_density_<magnetic density>_<guidance factor>").
+                Must contain a file named "generated_crystals.extxyz".
 
         Raises:
-            FileNotFoundError: If the 'generated_crystals.extxyz' file does not exist in the directory.
-            ValueError: If the 'generated_crystals.extxyz' file cannot be parsed into lattice data.
-            RuntimeError: If there is an error while inserting data into MongoDB or during MatterSim predictions.
+            ValueError: If the directory name format is incorrect or if the
+                        'generated_crystals.extxyz' file is empty or cannot be parsed.
+            FileNotFoundError: If the 'generated_crystals.extxyz' file does not exist
+                               in the specified directory.
+            RuntimeError: If there is an error during MongoDB insertion (`insert_one`).
+                          Note: This specifically wraps MongoDB exceptions.
+            Exception: Re-raises other unexpected exceptions encountered during processing
+                       (e.g., from `extract_metadata`, `parse_extxyz_to_json` setup).
         """
         # extract magnetic density and guidance factor
         try:
@@ -114,15 +133,18 @@ class StoreService:
         """
         Processes a batch of model results directories by calling `add_data` for each.
 
-        Iterates through subdirectories within the `batch_results_dir`. For each subdirectory,
-        it calls the `add_data` method to process and store the results. Tracks the number of
-        successfully and unsuccessfully processed directories and prints a summary.
+        Iterates through items within the `batch_results_dir`. For each item that is
+        a directory, it calls the `add_data` method to process and store the results
+        contained within that subdirectory. Tracks the number of successfully processed
+        directories and lists any directories that failed processing.
 
         Args:
-            batch_results_dir (str): Path to the directory containing subdirectories of model results.
+            batch_results_dir (str): Path to the parent directory containing
+                                     subdirectories of individual model results.
 
         Returns:
-            int: The number of directories successfully processed.
+            int: The number of subdirectories successfully processed (i.e., `add_data`
+                 completed without raising an exception).
         """
         if not os.path.isdir(batch_results_dir):
             print(f"The provided batch directory is not valid: {batch_results_dir}")
@@ -138,30 +160,39 @@ class StoreService:
             
             failed_dirs = []
             success_count = 0
+            processed_dirs_count = 0
             
             for (idx, folder) in enumerate(folders, start=1):
                 print(f"Processing folder {idx}/{num_folders}")
                 single_result_dir = os.path.join(batch_results_dir, folder)
                 if os.path.isdir(single_result_dir):
-                    print(f"Processing {single_result_dir}")
+                    processed_dirs_count += 1
+                    print(f"--> Processing directory: {single_result_dir}")
                     try:
                         self.add_data(single_result_dir)
                         success_count+=1
                         print(f"✅ Successfully processed {single_result_dir}")
                     except Exception as e:
                         failed_dirs.append(single_result_dir)
-                        print(f"❌ ERROR: An error occured while processing {single_result_dir}:\n \t{e}")
+                        print(f"❌ ERROR: Failed to process {single_result_dir}:\n \t{type(e).__name__}: {e}")
                     print("-"*120)
                 else:
                     failed_dirs.append(single_result_dir)
-                    print(f"{folder} is not a directory.")
+                    print(f"--> Skipping non-directory item: {single_result_dir}")
+                    
         except Exception as e:
             print(f"❌ ERROR: An error occurred during data processing: {e}")
             return success_count
         
-        print(f"{success_count}/{num_folders} folders succesfully processed.")
+        print("\n--- Batch Processing Summary ---")
+        print(f"Total items found: {num_folders}")
+        print(f"Items processed as directories: {processed_dirs_count}")
+        print(f"Successfully processed directories: {success_count}")
+        
         if failed_dirs:
-            print(f"⚠️ Directories that failed to process: {failed_dirs}")
+            print(f"⚠️ Directories that failed processing ({len(failed_dirs)}):")
+            for d in failed_dirs:
+                print(f"  - {d}")
         else:
             print("✅ All directories processed successfully.")
         return success_count
