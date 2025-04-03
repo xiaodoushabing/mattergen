@@ -90,7 +90,7 @@ def generate_lattice(request: GenerateRequest, store_service: StoreService = Dep
                 ]
 
                 try:
-                    logger.info(f"🚀\tRunning {current_permutation_index}/{total_permutations} MatterGen inference:\n \t{' '.join(gen_command)}")
+                    logger.info(f"🚀 Running {current_permutation_index}/{total_permutations} MatterGen inference:\n \t{' '.join(gen_command)}")
                     gen_result = subprocess.run(gen_command, capture_output=True, text=True, check=True)
                     logger.info(f"✅ MatterGen success\n {gen_result.stdout}")
                     generated_batches_count += 1
@@ -98,24 +98,25 @@ def generate_lattice(request: GenerateRequest, store_service: StoreService = Dep
                     logger.critical(f"❌ CRITICAL ERROR: 'mattergen-generate' command not found. Ensure it is installed and in the system PATH.")
                     raise HTTPException(status_code=500, detail="'mattergen-generate' command not found on server.")
                 except subprocess.CalledProcessError as e:
-                    logger.error(f"❌\tMatterGen failed for mag_density={md}, guidance_factor={gf}:\n \t{e.stderr}")
+                    logger.error(f"❌ MatterGen failed for mag_density={md}, guidance_factor={gf}:\n \t{e.stderr}")
                     logger.error("Continuing with the next permutation.")
                     continue
                 
         logger.info(f"Completed {generated_batches_count}/{total_permutations} permutations successfully for MatterGen\n {'%'*120}\n")
         if generated_batches_count > 0:
             try:
-                logger.info(f"⚙️\tHanding over {generated_batches_count} generated result directories in {batch_results_dir} to StoreService...")
+                logger.info(f"⚙️ Handing over {generated_batches_count} generated result directories in {batch_results_dir} to StoreService...")
                 db_added_batches_count  = store_service.process_batch(batch_results_dir)
-                logger.info(f"✅ StoreService processed results. {db_added_batches_count} batches added to DB.")
+                logger.info(f"StoreService completed processing results. {db_added_batches_count} batches added to DB.")
             
             except Exception as e:
                 # Catch exceptions from store_service (includes MatterSim/DB errors)
-                logger.error(f"❌ Error during StoreService processing (MatterSim/DB): {e}", exc_info=True) # Log traceback
+                logger.error(f"❌ Error during StoreService processing (MatterSim/DB): {e}", exc_info=True)
                 raise HTTPException(status_code=500, detail=f"Error during result processing/storage: {str(e)}")
         else:
              logger.warning("No MatterGen batches were generated successfully. Skipping database processing.")
-
+        if generated_batches_count == db_added_batches_count:
+            logger.info("✅ All generated batches successfully added into database.")
     return GenerateResponse(
         status="success" if generated_batches_count > 0 else "completed_with_no_generations",
         message="Lattice generation and processing finished.",

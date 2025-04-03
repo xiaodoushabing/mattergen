@@ -193,7 +193,7 @@ class StoreService:
             print(f"⚠️ Directories that failed processing ({len(failed_dirs)}):")
             for d in failed_dirs:
                 print(f"  - {d}")
-        else:
+        elif processed_dirs_count == success_count:
             print("✅ All directories processed successfully.")
         return success_count
 
