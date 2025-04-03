@@ -28,7 +28,7 @@ def get_store_service(lattice_collection: Collection = Depends(get_lattice_colle
     return StoreService(lattice_collection=lattice_collection, cal_mattersim=cal_mattersim, model=model)
 
 # Dependency to inject RetrievalService
-def get_lattices(lattice_collection: Collection = Depends(get_lattice_collection)):
+def retrieve_lattices(lattice_collection: Collection = Depends(get_lattice_collection)):
     """
     FastAPI dependency provider for the RetrievalService.
 
