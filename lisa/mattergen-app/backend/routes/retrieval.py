@@ -14,9 +14,10 @@ def get_lattices(filters: LatticeRequest, retrieval_service: RetrievalService = 
     The filters come from the body of the POST request (via LatticeRequest).
     """
     try:
-        lattices = retrieval_service.get_lattices_by_filters(filters)
-        if lattices:
-            return lattices
+        results = retrieval_service.get_lattices_by_filters(filters)
+        
+        if results["lattices"]:
+            return results
         else:
             raise HTTPException(status_code=404, detail="Lattices not found")
     except Exception as e:

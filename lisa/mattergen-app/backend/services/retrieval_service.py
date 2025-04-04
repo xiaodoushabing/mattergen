@@ -49,21 +49,33 @@ class RetrievalService:
         return filters_dict
 
 
-    def get_lattices_by_filters(self, filters: LatticeRequest):
+    def get_lattices_by_filters(self, filters: LatticeRequest, last_id=None):
         """
-        Retrieve lattices from MongoDB that match the provided filters.
+        Retrieve lattices from MongoDB that match the provided filters using _id-based pagination.
+        
         Args:
-            limit (int): The number of lattices to return.
-            filters (dict): The filters to apply to the MongoDB query.
+            filters (LatticeRequest): The filters to apply to the MongoDB query.
+            last_id (str, optional): The _id of the last document from the previous page to continue pagination.
+        
         Returns:
-            list: A list of lattice documents.
+            dictionary: A dictionary of lattice documents and next page's last ID.
         """
         try:
             filters_dict = self.build_filters(filters)
-            lattices = list(self.lattice_collection.find(filters_dict).limit(filters.limit))
+            if last_id:
+                filters_dict["_id"] = {"$gt": last_id}
+            lattices = list(self.lattice_collection.find(filters_dict)
+                            .sort("_id", 1)
+                            .limit(filters.limit))
+            
+            next_page_last_id = lattices[-1]["_id"] if lattices else None
+
             print(f"Executing MongoDB query: {filters_dict}")
             print(f"Number of lattices found: {len(lattices)}")
-            return lattices
+            return {
+                "lattices": lattices,
+                "next_page_last_id": next_page_last_id
+            }
         except Exception as e:
             raise RuntimeError(f"Error retrieving lattices by filters: {e}")
 
