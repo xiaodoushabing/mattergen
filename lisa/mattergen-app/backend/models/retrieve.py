@@ -1,7 +1,7 @@
 """
 Use Pydantic to define request/response models.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, List, Optional, Dict, Union
 
 class FilterCondition(BaseModel):
@@ -51,6 +51,7 @@ class MatterSimPredictions(BaseModel):
     stresses: Optional[List[List[float]]] = None
 
 class LatticeResponse(BaseModel):
+    id: str = Field(alias="_id")
     lattice_index: int  
     guidance_factor: float
     magnetic_density: float
