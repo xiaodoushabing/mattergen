@@ -28,6 +28,7 @@ def close_mongo(client: MongoClient):
         client.close()
         print("MongoDB connection closed.")
 
+# get_lattice_collection not used for background processing
 def get_lattice_collection():
     """
     Dependency injection for FastAPI to provide the lattice collection.

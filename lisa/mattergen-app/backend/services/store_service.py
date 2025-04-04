@@ -18,12 +18,11 @@ class StoreService:
         lattice_collection (pymongo.collection.Collection): The MongoDB collection instance
                                                             to store lattice data.
         cal_mattersim (bool): Flag indicating whether to calculate and store
-                              MatterSim predictions.
+                              MatterSim predictions. The default is True.
         model (int): The MatterSim model size identifier (e.g., 1 or 5) to use
-                     for predictions. Note: The default is 5 (as defined in deps.py),
-                     adjust in deps.py if a different default is standard.
+                     for predictions. Note: The default is 5.
     """
-    def __init__(self, lattice_collection: collection.Collection, cal_mattersim: bool, model: int):
+    def __init__(self, lattice_collection: collection.Collection, cal_mattersim: bool = True, model: int=5):
         """
         Initializes the StoreService.
 
@@ -187,10 +186,10 @@ class StoreService:
         print("\n--- Batch Processing Summary ---")
         print(f"Total items found: {num_folders}")
         print(f"Items processed as directories: {processed_dirs_count}")
-        print(f"Successfully processed directories: {success_count}")
+        print(f"Directories successfully processed: {success_count}")
         
         if failed_dirs:
-            print(f"⚠️ Directories that failed processing ({len(failed_dirs)}):")
+            print(f"⚠️ Directories that failed to process ({len(failed_dirs)}):")
             for d in failed_dirs:
                 print(f"  - {d}")
         elif processed_dirs_count == success_count:

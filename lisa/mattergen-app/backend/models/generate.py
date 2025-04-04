@@ -12,8 +12,9 @@ class GenerateRequest(BaseModel):
     # mattersim_model: Literal[1, 5] = 5
 
 class GenerateResponse(BaseModel):
-    status: str
+    # status: str
     message: str
-    total_permutations: int
-    generated_batches: int
-    db_added_batches: int
+    details: str
+    # total_permutations: int
+    # generated_batches: int
+    # db_added_batches: int
