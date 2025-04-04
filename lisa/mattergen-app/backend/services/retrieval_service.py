@@ -66,9 +66,12 @@ class RetrievalService:
                 filters_dict["_id"] = {"$gt": ObjectId(last_id)}
             lattices = list(self.lattice_collection.find(filters_dict)
                             .sort("_id", 1)
-                            .limit(filters.limit))
-            
-            next_page_last_id = str(lattices[-1]["_id"]) if lattices else None
+                            # fetch an extra lattice to determine if there'll be next page
+                            .limit(filters.limit+1))
+            next_page_last_id = None
+            if len(lattices) > filters.limit:
+                lattices = lattices[:filters.limit]
+                next_page_last_id = str(lattices[-1]["_id"]) if lattices else None
 
             print(f"Executing MongoDB query: {filters_dict}")
             print(f"Number of lattices found: {len(lattices)}")
