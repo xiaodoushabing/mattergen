@@ -131,3 +131,7 @@ class LatticeResponse(BaseModel):
                 }
             }
         }
+
+class RetrieveResponse(BaseModel):
+    lattices: List[LatticeResponse]
+    next_page_last_id: Optional[str]

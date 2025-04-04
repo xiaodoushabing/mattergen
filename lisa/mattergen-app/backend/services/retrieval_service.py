@@ -1,6 +1,6 @@
 from pymongo import collection
-from typing import Dict, Any
 from models.retrieve import LatticeRequest
+from bson import ObjectId
 
 class RetrievalService:
     """
@@ -49,7 +49,7 @@ class RetrievalService:
         return filters_dict
 
 
-    def get_lattices_by_filters(self, filters: LatticeRequest, last_id=None):
+    def get_lattices_by_filters(self, filters: LatticeRequest, last_id: str =None):
         """
         Retrieve lattices from MongoDB that match the provided filters using _id-based pagination.
         
@@ -63,20 +63,16 @@ class RetrievalService:
         try:
             filters_dict = self.build_filters(filters)
             if last_id:
-                filters_dict["_id"] = {"$gt": last_id}
+                filters_dict["_id"] = {"$gt": ObjectId(last_id)}
             lattices = list(self.lattice_collection.find(filters_dict)
                             .sort("_id", 1)
                             .limit(filters.limit))
             
-            next_page_last_id = lattices[-1]["_id"] if lattices else None
+            next_page_last_id = str(lattices[-1]["_id"]) if lattices else None
 
             print(f"Executing MongoDB query: {filters_dict}")
             print(f"Number of lattices found: {len(lattices)}")
-            return {
-                "lattices": lattices,
-                "next_page_last_id": next_page_last_id
-            }
+            return lattices, next_page_last_id
+            
         except Exception as e:
             raise RuntimeError(f"Error retrieving lattices by filters: {e}")
-
-
