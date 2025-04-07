@@ -4,20 +4,22 @@ from ase.io import read
 from mattersim.forcefield.potential import Potential
 from mattersim.datasets.utils.build import build_dataloader
 import re
-#%% define function to extract metadata from input directory
+
+from logging_config import get_logger
+logger = get_logger(service="utils")
+
 def extract_metadata(input_dir):
     """Extracts magnetic density and guidance factor from a directory name.
 
     Assumes the directory name ends with a pattern like
     '_<magnetic_density>_<guidance_factor>', where magnetic_density and
-    guidance_factor are int or floating-point numbers. Handles potential trailing
+    guidance_factor are float or integer values. Handles potential trailing
     slashes in the input directory path.
 
     Args:
         input_dir (str): The path to the directory whose name contains the metadata.
-                         Expected format example:
-                         "dft_mag_density_<magnetic density>_<guidance factor>" or
-                         "dft_mag_density_<magnetic density>_<guidance factor>/".
+                         Expected format: "dft_mag_density_<magnetic density>_<guidance factor>"
+                         or "dft_mag_density_<magnetic density>_<guidance factor>/".
 
     Returns:
         tuple[float, float]: A tuple containing the extracted magnetic density
@@ -30,16 +32,18 @@ def extract_metadata(input_dir):
     # The directory name should include magnetic density and
     # guidance factor in the format: "mag_density_guidance_factor"
     # (e.g., "dft_mag_density_<magnetic density>_<guidance factor>")
+    logger.info(f"Extracting metadata from directory: {input_dir}")
     match = re.search(r'_(\d+\.?\d*)_(\d+\.?\d*)$', input_dir.rstrip("/"))
     if not match:
+        logger.error(f"ERROR: Could not extract magnetic density and guidance factor from: {input_dir}")
         raise ValueError(f"Could not parse magnetic density and guidance factor from: {input_dir}")
     
     try:
         magnetic_density = float(match.group(1))
         guidance_factor = float(match.group(2))
-        print(f"Magnetic Density: {magnetic_density}, Guidance Factor: {guidance_factor}")
-    except ValueError as e:
-        print(f"ERROR: Could not convert extracted values to float. {e}")
+        logger.info(f"Extracted magnetic density: {magnetic_density}, guidance factor: {guidance_factor}")
+    except (IndexError, ValueError) as e:
+        logger.error(f"ERROR: Could not convert extracted values to float. {e}", exc_info=True)
         raise
     return magnetic_density, guidance_factor
 
@@ -69,20 +73,29 @@ def mattersim_prediction(structures_path, model):
                                               model loading, or prediction.
     """
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Running MatterSim on {device}")
+    logger.info(f"Running MatterSim on {device}")
 
     # load the model
-    potential = Potential.from_checkpoint(load_path=f"MatterSim-v1.0.0-{model}M.pth", device=device)
+    try:
+        potential = Potential.from_checkpoint(load_path=f"MatterSim-v1.0.0-{model}M.pth", device=device)
+        logger.debug(f"Loading of MatterSim {model}M potential model: {'successful' if potential else 'failed'}")
+        # load all structures from the extxyz file
+        # ASE's read returns a list of Atoms objects, which can be directly passed to build_dataloader().
+        structures = read(structures_path, index=":")
+        logger.debug(f"Reading structures from {structures_path}: {'successful' if structures else 'failed'}")
 
-    # load all structures from the extxyz file
-    # ASE's read returns a list of Atoms objects, which can be directly passed to build_dataloader().
-    structures = read(structures_path, index=":")
-
-    # build the dataloader that is compatible with MatterSim
-    dataloader = build_dataloader(structures, only_inference=True)
-    # make predictions
-    predictions = potential.predict_properties(dataloader, include_forces=True, include_stresses=True)
-
+        # build the dataloader that is compatible with MatterSim
+        dataloader = build_dataloader(structures, only_inference=True)
+        logger.debug(f"Building dataloader from structures: {'successful' if dataloader else 'failed'}")
+        # make predictions
+        predictions = potential.predict_properties(dataloader, include_forces=True, include_stresses=True)
+        logger.info(f"✅ Predictions made for {len(structures)} lattices using {model}M model.")
+    except FileNotFoundError as e:
+        logger.error(f"❌ Model checkpoint file not found: {e}", exc_info=True)
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error occurred during MatterSim inference: {e}", exc_info=True)
+        raise
     return predictions
 
 #%%
@@ -110,14 +123,13 @@ def parse_extxyz_to_json(structures_path):
                     - 'atoms' (dict): Dictionary mapping 1-based atom index (int) to
                                       another dictionary containing the element symbol
                                       (str) mapped to a list of its coordinates
-                                      ([x, y, z] as floats). Example:
-                                      {1: {'Si': [0.0, 0.0, 0.0]}, 2: {'O': [1.5, 0.0, 0.0]}}
+                                      ([x, y, z] as floats).
 
     Raises:
         OSError: If the file specified by `structures_path` cannot be opened or read.
         Exception: For unexpected errors during file processing before frame iteration.
                    Note: IndexError, ValueError, and other Exceptions during the
-                   parsing of *individual frames* are caught, printed, and the
+                   parsing of individual frames are caught, printed, and the
                    frame is skipped, allowing the function to potentially return
                    data from valid frames in a partially malformed file.
     """
@@ -125,12 +137,11 @@ def parse_extxyz_to_json(structures_path):
         with open(structures_path, 'r') as f:
             lines = f.read().strip().split("\n")
     except OSError as e:
-        print(f"ERROR: Could not read the file '{structures_path}'. || {e}")
+        logger.error(f"ERROR: Could not read the file '{structures_path}'. || {e}", exc_info=True)
         raise
     except Exception as e:
-        print(f"ERROR: An unexpected error occurred while processing the file {structures_path}. || {e}")
+        logger.error(f"ERROR: An unexpected error occurred while processing the file {structures_path}. || {e}")
         raise
-
     
     lattices = []
     i=0
@@ -170,19 +181,19 @@ def parse_extxyz_to_json(structures_path):
             idx += 1
         
         except IndexError as e:
-            print(f"ERROR: IndexError encountered while parsing lattice at line {i + 1}. || {e}")
+            logger.warning(f"ERROR: IndexError encountered while parsing lattice at line {i + 1}. || {e}")
             i += 1
             idx += 1
             continue
 
         except ValueError as e:
-            print(f"ERROR: ValueError encountered while parsing lattice at line {i + 1}. || {e}")
+            logger.warning(f"ERROR: ValueError encountered while parsing lattice at line {i + 1}. || {e}")
             i += 1
             idx += 1
             continue
 
         except Exception as e:
-            print(f"ERROR: Unexpected error encountered while parsing lattice at line {i + 1}. || {e}")
+            logger.warning(f"ERROR: Unexpected error encountered while parsing lattice at line {i + 1}. || {e}")
             i += 1
             idx += 1
             continue

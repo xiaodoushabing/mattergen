@@ -28,7 +28,7 @@ class LatticeRequest(BaseModel):
     energy: Optional[FilterCondition] = None
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "lattice_index": 8,
                 "guidance_factor": 4,
@@ -63,7 +63,7 @@ class LatticeResponse(BaseModel):
     ms_predictions: Optional[MatterSimPredictions]
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "lattice_index": 5,
                 "guidance_factor": 4,
