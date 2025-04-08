@@ -8,7 +8,7 @@ logger =get_logger(route="generate")
 
 router = APIRouter()
 
-@router.post("/generate_lattice", status_code=202, response_model=GenerateResponse)
+@router.post("/lattices", status_code=202, response_model=GenerateResponse)
 async def generate_lattice(request: GenerateRequest, 
                            background_task: BackgroundTasks):
     """

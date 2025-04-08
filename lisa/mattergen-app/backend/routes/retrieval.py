@@ -8,7 +8,7 @@ logger = get_logger(route="retrieval")
 
 router = APIRouter()
 
-@router.post("/lattices", response_model=RetrieveResponse)
+@router.post("/lattices/filter", response_model=RetrieveResponse)
 async def get_lattices(filters: LatticeRequest, last_id: str = None, retrieval_service: RetrievalService = Depends(retrieve_lattices)):
     """
     Retrieves lattices from MongoDB based on the provided filters.
