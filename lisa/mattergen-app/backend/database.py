@@ -10,7 +10,7 @@ mongo_port = os.environ.get("MONGO_PORT")
 db_name = os.environ.get("DB_NAME")
 collection_name = os.environ.get("COLLECTION_NAME")
 
-from logging_config import get_logger
+from core.logging_config import get_logger
 logger = get_logger(service="database")
 
 def connect_to_mongo():

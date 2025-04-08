@@ -2,7 +2,7 @@ from pymongo import collection
 from models.retrieve import LatticeRequest
 from bson import ObjectId
 
-from logging_config import get_logger
+from core.logging_config import get_logger
 logger = get_logger(service="retrieval")
 
 class RetrievalService:

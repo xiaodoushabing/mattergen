@@ -5,7 +5,7 @@ from mattersim.forcefield.potential import Potential
 from mattersim.datasets.utils.build import build_dataloader
 import re
 
-from logging_config import get_logger
+from core.logging_config import get_logger
 logger = get_logger(service="utils")
 
 def extract_metadata(input_dir):

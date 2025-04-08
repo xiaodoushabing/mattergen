@@ -3,13 +3,13 @@ from models.retrieve import RetrieveResponse, LatticeRequest, LatticeResponse
 from services.retrieval_service import RetrievalService
 from deps import retrieve_lattices
 
-from logging_config import get_logger
+from core.logging_config import get_logger
 logger = get_logger(route="retrieval")
 
 router = APIRouter()
 
 @router.post("/lattices", response_model=RetrieveResponse)
-def get_lattices(filters: LatticeRequest, last_id: str = None, retrieval_service: RetrievalService = Depends(retrieve_lattices)):
+async def get_lattices(filters: LatticeRequest, last_id: str = None, retrieval_service: RetrievalService = Depends(retrieve_lattices)):
     """
     Retrieves lattices from MongoDB based on the provided filters.
 
@@ -30,7 +30,7 @@ def get_lattices(filters: LatticeRequest, last_id: str = None, retrieval_service
     """
     logger.info(f"Received request to retrieve lattices with filters: {filters}")
     try:
-        lattices, next_page_last_id = retrieval_service.get_lattices_by_filters(filters, last_id)
+        lattices, next_page_last_id = await retrieval_service.get_lattices_by_filters(filters, last_id)
         
         if lattices:
             logger.info(f"Retrieved {len(lattices)} lattices. Next page last ID: {next_page_last_id}")
@@ -43,7 +43,7 @@ def get_lattices(filters: LatticeRequest, last_id: str = None, retrieval_service
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/lattice/{id}", response_model=LatticeResponse)
-def get_lattice(id: str = None, retrieval_service: RetrievalService = Depends(retrieve_lattices)):
+async def get_lattice(id: str = None, retrieval_service: RetrievalService = Depends(retrieve_lattices)):
     """
     Retrieves a lattice with the specified ID.
 
@@ -64,7 +64,7 @@ def get_lattice(id: str = None, retrieval_service: RetrievalService = Depends(re
         logger.error("Lattice ID is required.")
         raise HTTPException(status_code=400, detail="Lattice ID is required.")
     try:
-        lattice = retrieval_service.get_lattice_by_id(id)
+        lattice = await retrieval_service.get_lattice_by_id(id)
         if lattice:
             logger.info(f"Successfully retrieved lattice with ID: {id}")
             return LatticeResponse(**lattice)

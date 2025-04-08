@@ -8,10 +8,8 @@ from typing import List
 from services.store_service import StoreService
 from database import connect_to_mongo, close_mongo
 
-from logging_config import get_logger
+from core.logging_config import get_logger
 logger = get_logger(service="generate")
-
-router = APIRouter()
 
 def run_generation_and_processing(mag_density: List,
                                   guidance_factor: List,
@@ -39,7 +37,26 @@ def run_generation_and_processing(mag_density: List,
         HTTPException: Raises an HTTPException with a status code 500 if a critical error occurs during
                        the StoreService batch processing or MongoDB storage.
     """
-    logger.info("Background task started: Running MatterGen permutations.")
+    logger.info("Background task started.")
+
+    # Exit the task early if DB connection fails
+    logger.info("Background Task: Initiating connection to MongoDB. Verifying connection parameters and availability before running mattergen...")
+    client = None
+    lattice_collection = None
+    try:
+        client, lattice_collection = connect_to_mongo()
+        if lattice_collection is None:
+            logger.warning("Background Task: Failed to retrieve the 'lattice' collection. Please verify DB connection details and configuration. Aborting task.")
+            return
+        logger.info("Background Task: Successfully connected to the database and retrieved the lattice collection.")
+    except Exception as e:
+        logger.error(f"Background Task: Error connecting to MongoDB at the start of the background task: {e}. Aborting task.", exc_info=True)
+        return
+    finally:
+        if client:
+            close_mongo(client)
+            logger.info("Background Task: MongoDB connection closed after initial check. Proceeding with task.")
+        client = None
     
     num_mag_density = len(mag_density)
     num_guidance_factor = len(guidance_factor)
@@ -70,39 +87,38 @@ def run_generation_and_processing(mag_density: List,
                 ]
 
                 try:
-                    logger.info(f"🚀 Background Task: Running {current_permutation_index}/{total_permutations} MatterGen inference:\n \t{' '.join(gen_command)}")
+                    logger.info(f"Background Task: 🚀 Running {current_permutation_index}/{total_permutations} MatterGen inference:\n \t{' '.join(gen_command)}")
                     gen_result = subprocess.run(gen_command, capture_output=True, text=True, check=True)
-                    logger.info(f"✅ Background Task: MatterGen for magnetic density {md}, guidance factor {gf} - successful\n {gen_result.stdout}")
+                    logger.info(f"Background Task: ✅ MatterGen inference for magnetic density {md}, guidance factor {gf} - successful\n {gen_result.stdout}")
                     generated_batches_count += 1
                 except FileNotFoundError:
-                    logger.critical(f"❌ CRITICAL ERROR in Background Task: 'mattergen-generate' command not found. Ensure it is installed and in the system PATH.")
+                    logger.critical(f"CRITICAL ERROR in Background Task: ❌ 'mattergen-generate' command not found. Ensure it is installed and in the system PATH.")
                     return
                 except subprocess.CalledProcessError as e:
-                    logger.error(f"❌ Background Task: MatterGen failed for mag_density={md}, guidance_factor={gf}:\n \t{e.stderr}")
+                    logger.error(f"Background Task: ❌ MatterGen failed for mag_density={md}, guidance_factor={gf}:\n \t{e.stderr}")
                     logger.error("Background Task: Continuing with the next permutation.")
                     continue
 
         logger.info(f"Background Task: Completed {generated_batches_count}/{total_permutations} permutations successfully for MatterGen\n\n {'%'*120}\n")
         
         if generated_batches_count > 0:
-            client = None
             try:
                 client, lattice_collection = connect_to_mongo()
                 if lattice_collection is None:
-                    logger.warning(f"Failed to retrieve the 'lattice' collection from the database. Please verify the DB connection details and the collection configuration.")
+                    logger.warning(f"Background Task: Failed to retrieve the 'lattice' collection from the database. Please verify the DB connection details and the collection configuration.")
                 
-                logger.info(f"⚙️ Background Task: Handing over {generated_batches_count} generated result directories in {batch_results_dir} to StoreService...")
+                logger.info(f"Background Task: ⚙️ Handing over {generated_batches_count} generated result directories in {batch_results_dir} to StoreService...")
                 store_service = StoreService(lattice_collection)
                 db_added_batches_count  = store_service.process_batch(batch_results_dir)
                 logger.info(f"Background Task: StoreService completed processing results. {db_added_batches_count} batches added to DB.")
             except Exception as e:
-                logger.warning(f"❌ Background Task: Error during StoreService processing (MatterSim/DB): {e}", exc_info=True)
+                logger.warning(f"Background Task: ❌ Error during StoreService processing (MatterSim/DB): {e}", exc_info=True)
             finally:
                 if client:
                     close_mongo(client)
         else:
             logger.warning("Background Task: No MatterGen batches were generated successfully. Skipping database processing.")
         if generated_batches_count == db_added_batches_count:
-            logger.info("✅ Background Task: All generated batches successfully added into database.")
+            logger.info("Background Task: ✅ All generated batches successfully added into database.")
 
     logger.info(f"Background Task finished. Generated {generated_batches_count}/{total_permutations} total permutations. Added {db_added_batches_count} batches to DB.")

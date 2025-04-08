@@ -4,7 +4,7 @@ import os
 from .utils import parse_extxyz_to_json, mattersim_prediction, extract_metadata
 from pymongo import collection
 
-from logging_config import get_logger
+from core.logging_config import get_logger
 logger = get_logger(service="store")
 
 #%% define function to add data into db

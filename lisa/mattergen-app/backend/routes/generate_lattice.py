@@ -3,7 +3,7 @@ from fastapi import HTTPException, APIRouter, BackgroundTasks
 from models.generate import GenerateRequest, GenerateResponse
 from services.generate_service import run_generation_and_processing
 
-from logging_config import get_logger
+from core.logging_config import get_logger
 logger =get_logger(route="generate")
 
 router = APIRouter()
