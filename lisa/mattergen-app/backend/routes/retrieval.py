@@ -30,7 +30,7 @@ async def get_lattices(filters: LatticeRequest, last_id: str = None, retrieval_s
     """
     logger.info(f"Received request to retrieve lattices with filters: {filters}")
     try:
-        lattices, next_page_last_id = await retrieval_service.get_lattices_by_filters(filters, last_id)
+        lattices, next_page_last_id = retrieval_service.get_lattices_by_filters(filters, last_id)
         
         if lattices:
             logger.info(f"Retrieved {len(lattices)} lattices. Next page last ID: {next_page_last_id}")
@@ -64,7 +64,7 @@ async def get_lattice(id: str = None, retrieval_service: RetrievalService = Depe
         logger.error("Lattice ID is required.")
         raise HTTPException(status_code=400, detail="Lattice ID is required.")
     try:
-        lattice = await retrieval_service.get_lattice_by_id(id)
+        lattice = retrieval_service.get_lattice_by_id(id)
         if lattice:
             logger.info(f"Successfully retrieved lattice with ID: {id}")
             return LatticeResponse(**lattice)

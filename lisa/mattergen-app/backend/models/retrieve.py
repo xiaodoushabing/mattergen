@@ -28,7 +28,7 @@ class LatticeRequest(BaseModel):
     energy: Optional[FilterCondition] = None
     
     class Config:
-        json_schema_extra = {
+        schema_extra = {
             "example": {
                 "lattice_index": 8,
                 "guidance_factor": 4,
