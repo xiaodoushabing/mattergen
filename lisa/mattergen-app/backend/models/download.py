@@ -1,18 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 import os
-from dotenv import load_dotenv
-from pathlib import Path
+# from dotenv import load_dotenv
+# from pathlib import Path
 
-load_dotenv()
+# load_dotenv()
 
-default_dl_path = Path(os.getenv("MATTERGEN_DOWNLOAD_PATH"))
-default_dl_path.mkdir(parents=True, exist_ok=True)
+# default_dl_path = Path(os.getenv("MATTERGEN_DOWNLOAD_PATH"))
+# default_dl_path.mkdir(parents=True, exist_ok=True)
 
 class DownloadRequest(BaseModel):
-    lattice_id: List[str]
-    dl_path: Optional[str] = default_dl_path
+    lattice_ids: List[str] = Field(..., min_length=1)
+    # dl_path: Optional[str] = default_dl_path
+    filename: str = Field("lattices.extxyz", description="Desired filename for the downloaded file.")
 
 class DownloadResponse(BaseModel):
-    message: str = "Download request processed successfully."
-    file_name: Optional[str] = None
+    message: str
+    details: Optional[str]

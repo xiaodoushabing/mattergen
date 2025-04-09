@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import generate_lattice, retrieval
+from routes import generate_lattice, retrieval, download
 from database import connect_to_mongo
 from core.middleware_config import LogRequestMiddleware
 
@@ -21,3 +21,4 @@ async def read_root():
 
 app.include_router(generate_lattice.router)
 app.include_router(retrieval.router)
+app.include_router(download.router)

@@ -63,7 +63,7 @@ class LatticeResponse(BaseModel):
     ms_predictions: Optional[MatterSimPredictions]
 
     class Config:
-        json_schema_extra = {
+        schema_extra = {
             "example": {
                 "lattice_index": 5,
                 "guidance_factor": 4,
