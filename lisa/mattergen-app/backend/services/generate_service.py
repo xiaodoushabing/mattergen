@@ -88,14 +88,38 @@ def run_generation_and_processing(mag_density: List,
 
                 try:
                     logger.info(f"Background Task: 🚀 Running {current_permutation_index}/{total_permutations} MatterGen inference:\n \t{' '.join(gen_command)}")
-                    gen_result = subprocess.run(gen_command, capture_output=True, text=True, check=True)
+                    gen_result = subprocess.run(gen_command, 
+                                                capture_output=True,
+                                                text=True,
+                                                check=True,
+                                                encoding='utf-8',
+                                                errors='replace')
                     logger.info(f"Background Task: ✅ MatterGen inference for magnetic density {md}, guidance factor {gf} - successful\n {gen_result.stdout}")
                     generated_batches_count += 1
                 except FileNotFoundError:
                     logger.critical(f"CRITICAL ERROR in Background Task: ❌ 'mattergen-generate' command not found. Ensure it is installed and in the system PATH.")
                     return
                 except subprocess.CalledProcessError as e:
-                    logger.error(f"Background Task: ❌ MatterGen failed for mag_density={md}, guidance_factor={gf}:\n \t{e.stderr}")
+                    stderr_output = e.stderr
+                    stdout_output = e.stdout
+
+                    if isinstance(stderr_output, bytes):
+                        try:
+                            stderr_output = stderr_output.decode('utf-8', errors='replace')
+                        except Exception as decode_err:
+                            logger.error(f"Failed to decode stderr: {decode_err}")
+                            stderr_output = str(stderr_output)
+                    logger.error(f"Background Task: ❌ MatterGen failed for mag_density={md}, guidance_factor={gf}:\n \tExit Code: {e.returncode}\n \tStderr: {stderr_output}")
+                    
+                    if isinstance(stdout_output, bytes):
+                        try:
+                            stdout_output = stdout_output.decode('utf-8', errors='replace')
+                        except Exception as decode_err:
+                            logger.error(f"Failed to decode stdout: {decode_err}")
+                            stdout_output = str(stdout_output)
+                    if stdout_output:
+                        logger.error(f"\tStdout: {stdout_output}")
+
                     logger.error("Background Task: Continuing with the next permutation.")
                     continue
 
