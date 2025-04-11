@@ -23,6 +23,7 @@ class LatticeRequest(BaseModel):
     guidance_factor: Optional[FilterCondition] = None
     magnetic_density: Optional[FilterCondition] = None
     no_of_atoms: Optional[FilterCondition] = None
+    atoms_list: List[str] = None
     # atoms_list: Optional[Dict[str, int]] = None
     # cell_parameters: Optional[List[float]] = None
     energy: Optional[FilterCondition] = None
@@ -34,6 +35,7 @@ class LatticeRequest(BaseModel):
                 "guidance_factor": 4,
                 "magnetic_density": 3,
                 "no_of_atoms": 12,
+                "atoms_list": ["Fe", "Pt"],
                 # "cell_parameters": [
                 #     3.570263147354126, 0.0, -0.6019660830497742, -0.11143380736674079,
                 #     3.560295917167594, -0.6013088822364807, 0.0, 0.0, 11.015626907348633

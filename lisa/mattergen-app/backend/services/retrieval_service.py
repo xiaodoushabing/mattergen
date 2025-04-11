@@ -51,7 +51,11 @@ class RetrievalService:
             if field_value is not None:
                 mongo_field = "ms_predictions.energy" if field == "energy" else field
                 filters_dict[mongo_field] = {f"${field_value.op}": field_value.value}
-        
+
+        if filters.atoms_list:
+            for atom in filters.atoms_list:
+                filters_dict[f"atoms_list.{atom}"] = {"$exists": 1}
+
         logger.debug(f"Generated MongoDB filters: {filters_dict}")
         return filters_dict
 
