@@ -15,9 +15,10 @@ def format_request_log(request, response_status=None, error=None):
             "client_ip": request.client.host
         }
 
-        headers = {k: v for k, v in request.headers.items()}
-        if headers:
-            log_dict["headers"] = headers
+        safe_headers = {k: v for k, v in request.headers.items()
+                        if k.lower() not in ['cookie', 'authorization']}
+        if safe_headers:
+            log_dict["headers"] = safe_headers
         
         if response_status is not None:
             log_dict["status_code"] = response_status
@@ -40,7 +41,7 @@ class LogRequestMiddleware(BaseHTTPMiddleware):
         Middleware to log incoming requests and their processing time.
         """
         start_time = time.time()
-        request_id = str(time.time())
+        request_id = str(start_time)
         
         try:
             logger.debug(f"middleware | Request : {request}")
