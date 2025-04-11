@@ -42,7 +42,7 @@ async def get_lattices(filters: LatticeRequest, last_id: str = None, retrieval_s
         logger.error(f"Error occurred while retrieving lattices: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/lattice/{id}", response_model=LatticeResponse)
+@router.get("/lattice/{id}", response_model=LatticeResponse)
 async def get_lattice(id: str = None, retrieval_service: RetrievalService = Depends(retrieve_lattices)):
     """
     Retrieves a lattice with the specified ID.
