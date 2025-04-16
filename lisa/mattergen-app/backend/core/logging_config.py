@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 from loguru import logger
 from datetime import timedelta 
-import json
 
 # Create logs directory if it doesn't exist
 LOGS_DIR = Path("logs")

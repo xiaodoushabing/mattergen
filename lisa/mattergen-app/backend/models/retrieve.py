@@ -1,6 +1,3 @@
-"""
-Use Pydantic to define request/response models.
-"""
 from pydantic import BaseModel, Field
 from typing import Literal, List, Optional, Dict, Union
 
@@ -23,8 +20,7 @@ class LatticeRequest(BaseModel):
     guidance_factor: Optional[FilterCondition] = None
     magnetic_density: Optional[FilterCondition] = None
     no_of_atoms: Optional[FilterCondition] = None
-    atoms_list: List[str] = None
-    # atoms_list: Optional[Dict[str, int]] = None
+    atoms_list: Optional[List[str]] = None
     # cell_parameters: Optional[List[float]] = None
     energy: Optional[FilterCondition] = None
     

@@ -1,15 +1,23 @@
 #%%
-from fastapi import APIRouter
 import subprocess
 import os
 import tempfile
 from typing import List
+# import torch
+# import gc
 
 from services.store_service import StoreService
 from database import connect_to_mongo, close_mongo
 
 from core.logging_config import get_logger
 logger = get_logger(service="generate")
+
+# def _cleanup_gpu():
+#     gc.collect()
+#     if torch.cuda.is_available():
+#         torch.cuda.empty_cache()
+#         torch.cuda.ipc_collect()
+#         logger.debug("GPU resources cleaned up")
 
 def run_generation_and_processing(mag_density: List,
                                   guidance_factor: List,
@@ -95,7 +103,9 @@ def run_generation_and_processing(mag_density: List,
                                                 encoding='utf-8',
                                                 errors='replace')
                     logger.info(f"Background Task: ✅ MatterGen inference for magnetic density {md}, guidance factor {gf} - successful\n {gen_result.stdout}")
+                    del gen_result
                     generated_batches_count += 1
+                    # _cleanup_gpu()
                 except FileNotFoundError:
                     logger.critical(f"CRITICAL ERROR in Background Task: ❌ 'mattergen-generate' command not found. Ensure it is installed and in the system PATH.")
                     return

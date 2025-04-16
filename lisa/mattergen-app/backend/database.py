@@ -5,10 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-mongo_host = os.environ.get("MONGO_HOST")
-mongo_port = os.environ.get("MONGO_PORT")
-db_name = os.environ.get("DB_NAME")
-collection_name = os.environ.get("COLLECTION_NAME")
+from core.settings import get_settings
+settings = get_settings()
 
 from core.logging_config import get_logger
 logger = get_logger(service="database")
@@ -29,15 +27,15 @@ def connect_to_mongo():
         ConnectionError: If there is an issue connecting to the MongoDB instance.
     """
     try: 
-        logger.debug(f"Connecting to MongoDB at {mongo_host}:{mongo_port} in database {db_name}, collection {collection_name}...")
-        client = MongoClient(f"mongodb://{mongo_host}:{mongo_port}/")
-        db = client[db_name]
-        lattice_collection = db[collection_name]
+        logger.debug(f"Connecting to MongoDB at {settings.mongo_host}:{settings.mongo_port} in database {settings.db_name}, collection {settings.collection_name}...")
+        client = MongoClient(f"mongodb://{settings.mongo_host}:{settings.mongo_port}/")
+        db = client[settings.db_name]
+        lattice_collection = db[settings.collection_name]
         logger.info("Successfully connected to MongoDB.")
         return client, lattice_collection
     except Exception as e:
         logger.error(f"Error connecting to MongoDB: {e}", exc_info=True)
-        raise ConnectionError(f"Failed to connect to MongoDB at {mongo_host}:{mongo_port}: {e}", exc_info=True)
+        raise ConnectionError(f"Failed to connect to MongoDB at {settings.mongo_host}:{settings.mongo_port}: {e}", exc_info=True)
 
 def close_mongo(client: MongoClient):
     """
