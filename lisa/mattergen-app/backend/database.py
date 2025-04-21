@@ -1,9 +1,5 @@
 #%%
 from pymongo import MongoClient
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 from core.settings import get_settings
 settings = get_settings()
