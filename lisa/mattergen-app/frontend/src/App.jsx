@@ -73,10 +73,12 @@ function App() {
         </h1>
         {/* Subheading */}
         <div className="relative z-10 text-center mb-6 max-w-3xl">
-          <h2 className="text-3xl sm:text-4xl font-semibold text-teal-50 leading-snug">
+          {/* <h2 className="text-3xl sm:text-4xl font-semibold text-teal-50 leading-snug">
             Welcome to <span className="text-emerald-200 font-bold font-['Inter']">MatBuddy</span>
-          </h2>
+          </h2> */}
           <p className="mt-2 text-lg sm:text-xl text-teal-100 font-light">
+            Your AI assistant for exploring and generating material structures
+            <br></br>
             Powered by{' '}
             <a
               href="https://github.com/microsoft/mattergen"
@@ -95,7 +97,7 @@ function App() {
             >
               MatterSim
             </a>
-            {' '}open-source models, your AI assistant for exploring and generating material structures.
+            {' '}open-source models
           </p>
         </div>
 
