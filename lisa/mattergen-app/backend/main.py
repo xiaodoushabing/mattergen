@@ -33,7 +33,7 @@ async def setup_indexes():
                                      ])
 @app.get("/")
 async def read_root():
-    return {"message": "Welcome to Mattergen API"}
+    return {"message": "Welcome to MatBuddy API"}
 
 app.include_router(generate_lattice.router)
 app.include_router(retrieval.router)

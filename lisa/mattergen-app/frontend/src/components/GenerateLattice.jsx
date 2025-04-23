@@ -71,9 +71,9 @@ function GenerateLattice () {
         
         // Prepare the request data
         const requestData = {
-            magneticDensity: magneticDensity,
-            guidanceFactor: guidanceFactor,
-            batchSize: batchSize
+            magnetic_density: magneticDensity,
+            guidance_factor: guidanceFactor,
+            batch_size: batchSize
         };
 
         // Send the request to the backend
