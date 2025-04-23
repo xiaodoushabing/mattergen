@@ -77,7 +77,25 @@ function App() {
             Welcome to <span className="text-emerald-200 font-bold font-['Inter']">MatBuddy</span>
           </h2>
           <p className="mt-2 text-lg sm:text-xl text-teal-100 font-light">
-            Your AI assistant for exploring and generating material structures.
+            Powered by{' '}
+            <a
+              href="https://github.com/microsoft/mattergen"
+              target="_blank" //opens in a new tab
+              rel="noopener noreferrer" // security best practice
+              className='font-semibold hover:font-bold hover:text-emerald-100 transition duration-150 ease-in-out'
+            >
+              MatterGen
+            </a>
+            {' '}and{' '}
+            <a
+              href="https://github.com/microsoft/mattersim"
+              target='_blank'
+              rel="noopener noreferrer"
+              className='font-semibold hover:font-bold hover:text-emerald-100 transition duration-150 ease-in-out'
+            >
+              MatterSim
+            </a>
+            {' '}open-source models, your AI assistant for exploring and generating material structures.
           </p>
         </div>
 
