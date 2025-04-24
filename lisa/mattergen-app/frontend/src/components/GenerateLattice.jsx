@@ -114,7 +114,7 @@ function GenerateLattice () {
     
     return (
         
-        <div className="relative z-10 p-8 bg-white rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-3xl w-full mx-auto">
+        <div className="relative z-10 p-8 bg-slate-50 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-3xl w-full mx-auto">
         <h2 className=" relative z-10 text-6xl font-semibold text-slate-800 mb-15 mt-5 text-center">
             Generate Lattices
         </h2>

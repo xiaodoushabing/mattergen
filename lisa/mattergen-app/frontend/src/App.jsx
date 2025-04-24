@@ -4,6 +4,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 // import components
 import Home from './components/Home';
 import GenerateLattice from './components/GenerateLattice';
+import DownloadLattice from './components/DownloadLattice';
 
 // --- NavLink Component Definition ---
 function NavLink({ to, children }) {
@@ -63,6 +64,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/generate" element={<GenerateLattice />} />
+          <Route path="/download" element={<DownloadLattice />} />
         </Routes>
       </main>
     </div>
