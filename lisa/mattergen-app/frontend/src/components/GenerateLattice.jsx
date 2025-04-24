@@ -89,15 +89,15 @@ function GenerateLattice () {
             });
 
             if (response.status === 202 && response.data) {
-                setMessage(`${response.data.message || ''} ${response.data.details || ''}`);
+                setMessage(`${response.data.message} ${response.data.details}`);
             } else {
                 // Handle unexpected success response
                 setMessage('Request submitted, but received an unexpected response.');
                 console.error('Unexpected success response:', response);
             }
         } catch (err) {
-            console.error('Error submitting generation requet:', err);
-            if (err.response && err.response.data && err.response.data.detail) {
+            console.error('Error submitting generation request:', err);
+            if (err.response?.data?.detail) {
                 setError(`Error: ${err.response.data.detail}`);
             } else if (err.isAxiosError && !err.response) {
                 setError('Network Error: Could not connect to the server. Please check your connection or the server status.');
