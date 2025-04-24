@@ -1,6 +1,9 @@
 import React, {useState} from "react";
 import axios from "axios";
 
+// const API = import.meta.env.VITE_API_URL;
+const API = "http://localhost:8000"
+
 function GenerateLattice () {
     const [magneticDensityStr, setMagneticDensityStr] = useState("");
     const [guidanceFactorStr, setGuidanceFactorStr] = useState("");
@@ -79,14 +82,14 @@ function GenerateLattice () {
         // Send the request to the backend
         try {
             // Assuming proxy setup for /api, otherwise use full URL e.g., 'http://localhost:8000/lattices'
-            const response = await axios.post('http://localhost:8000/lattices', requestData, {
+            const response = await axios.post(`${API}/lattices`, requestData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
             if (response.status === 202 && response.data) {
-                setMessage(`${response.data.message} ${response.data.details || ''}`);
+                setMessage(`${response.data.message || ''} ${response.data.details || ''}`);
             } else {
                 // Handle unexpected success response
                 setMessage('Request submitted, but received an unexpected response.');
@@ -116,7 +119,7 @@ function GenerateLattice () {
             Generate Lattices
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-10">
+        <form onSubmit={handleSubmit} className="space-y-12">
             {/* Magnetic Density Input */}
             <div>
                 <label htmlFor="magneticDensity" className="block text-2xl font-semibold text-emerald-700 mb-2">
