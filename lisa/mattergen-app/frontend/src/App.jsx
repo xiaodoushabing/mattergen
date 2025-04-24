@@ -11,8 +11,8 @@ function NavLink({ to, children }) {
   const location = useLocation();
   const isActive = location.pathname === to;
   const baseClasses = "block transition duration-200 ease-in-out";
-  const activeClasses = "text-emerald-950 font-black text-2xl";
-  const inactiveClasses = "text-xl font-semibold text-zinc-800 hover:underline";
+  const activeClasses = "text-emerald-950 font-black text-xl";
+  const inactiveClasses = "text-md font-semibold text-zinc-800 hover:underline";
   const combinedClasses = `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
 
   return (
@@ -27,17 +27,17 @@ function App() {
   return (
     <div className="w-screen h-screen flex bg-zinc-100 text-zinc-900">
       {/* Sidebar */}
-      <aside className="w-88 bg-green-100 text-zinc-800 shadow-[0_4px_20px_rgba(0,0,0,0.5)] p-10 flex flex-col justify-between">
+      <aside className="w-72 bg-green-100 text-zinc-800 shadow-[0_4px_20px_rgba(0,0,0,0.5)] p-10 flex flex-col justify-between">
         <div>
           {/* Sidebar Header */}
           <a 
             href="/"
             className="flex items-center space-x-5 mb-10 group"
           >
-            <span className="flex items-center justify-center w-12 h-12 bg-teal-700 rounded-xl text-teal-50 font-bold font-['Poppins'] text-2xl group-hover:bg-teal-900 transition duration-200 ease-in-out">
+            <span className="flex items-center justify-center w-10 h-10 bg-teal-700 rounded-xl text-teal-50 font-bold font-['Poppins'] text-xl group-hover:bg-teal-900 transition duration-200 ease-in-out">
               MB
             </span>
-            <span className="text-3xl font-extrabold tracking-wider uppercase text-teal-800 group-hover:text-teal-900 transition duration-200 ease-in-out font-['Poppins'] drop-shadow-sm">
+            <span className="text-2xl font-extrabold tracking-wider uppercase text-teal-800 group-hover:text-teal-900 transition duration-200 ease-in-out font-['Poppins'] drop-shadow-sm">
             MatBuddy
             </span>
           </a>
@@ -50,17 +50,17 @@ function App() {
           </nav>
         </div>
         {/* Sidebar Footer */}
-        <div className="text-md text-zinc-500">
+        <div className="text-xs text-zinc-500">
           &copy; 2025 SRG
         </div>
       </aside>
 
       {/* Main Content */}
       <main
-        className="relative  flex-1 flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+        className="relative flex-1 flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${backgroundImage})` }}
         >
-        <div className="absolute inset-0 bg-black opacity-85 z-0"></div>
+        <div className="absolute inset-0 bg-black opacity-75 z-0"></div>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/generate" element={<GenerateLattice />} />

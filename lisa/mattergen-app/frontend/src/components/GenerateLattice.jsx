@@ -114,19 +114,19 @@ function GenerateLattice () {
     
     return (
         
-        <div className="relative z-10 p-8 bg-slate-50 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-3xl w-full mx-auto">
-        <h2 className=" relative z-10 text-6xl font-semibold text-slate-800 mb-15 mt-5 text-center">
+        <div className="relative z-10 p-8 bg-slate-50 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-2xl w-full mx-auto">
+        <h2 className=" relative z-10 text-3xl font-semibold text-slate-800 mb-10 mt-5 text-center">
             Generate Lattices
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-12">
+        <form onSubmit={handleSubmit} className="space-y-10">
             {/* Magnetic Density Input */}
             <div>
-                <label htmlFor="magneticDensity" className="block text-2xl font-semibold text-emerald-700 mb-2">
+                <label htmlFor="magneticDensity" className="block text-lg font-semibold text-emerald-700 mb-1">
                     Magnetic Density
                 </label>
                 {/* Example input */}
-                <p className="text-md text-gray-500 mb-2">
+                <p className="text-sm text-gray-500 mb-2">
                     Enter one or more numbers, separated by commas.
                 </p> 
 
@@ -143,11 +143,11 @@ function GenerateLattice () {
 
             {/* Guidance Factor Input */}
             <div>
-                <label htmlFor="guidanceFactor" className="block text-2xl font-semibold text-emerald-700 mb-2">
+                <label htmlFor="guidanceFactor" className="block text-lg font-semibold text-emerald-700 mb-1">
                     Guidance Factor
                 </label>
                 {/* Example input */}
-                <p className="text-md text-gray-500 mb-2">
+                <p className="text-sm text-gray-500 mb-2">
                     Enter one or more numbers, separated by commas.
                 </p> 
 
@@ -164,11 +164,11 @@ function GenerateLattice () {
 
             {/* Batch Size Input */}
             <div>
-                <label htmlFor="batchSize" className="block text-2xl font-semibold text-emerald-700 mb-2">
+                <label htmlFor="batchSize" className="block text-lg font-semibold text-emerald-700 mb-1">
                     Batch Size
                 </label>
                 {/* Example input */}
-                <p className="text-md text-gray-500 mb-2">
+                <p className="text-sm text-gray-500 mb-2">
                     Enter an integer.
                 </p> 
 
@@ -189,7 +189,7 @@ function GenerateLattice () {
             <div className='flex justify-center'>
                 <button
                     type="submit"
-                    className={`bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-700 hover:to-teal-600 text-stone-100 font-bold text-xl py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 ease-in-out ${
+                    className={`bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-700 hover:to-teal-600 text-stone-100 font-bold text-lg py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 ease-in-out ${
                     isLoading
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-teal-800 hover:bg-emerald-700'
@@ -203,12 +203,12 @@ function GenerateLattice () {
 
         {/* Feedback Messages */}
         {message && (
-            <div className="mt-4 p-3 bg-green-100 text-green-800 border border-green-200 rounded-md text-md">
+            <div className="mt-4 p-3 bg-green-100 text-green-800 border border-green-200 rounded-md text-sm">
             {message}
             </div>
         )}
         {error && (
-            <div className="mt-4 p-3 bg-red-100 text-red-800 border border-red-200 rounded-md text-md">
+            <div className="mt-4 p-3 bg-red-100 text-red-800 border border-red-200 rounded-md text-sm">
             {error}
             </div>
         )}

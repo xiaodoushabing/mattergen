@@ -15,7 +15,7 @@ function Home() {
             </div>
             {/* Main Heading */}
             <h1 className="relative z-10 font-['Poppins'] text-6xl mb-8 mt-8 text-center tracking-wide leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-            <span className="drop-shadow-lg text-7xl bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="drop-shadow-lg text-5xl bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                 Artificial Intelligence for Materials Discovery
             </span>
             </h1>
@@ -24,7 +24,7 @@ function Home() {
             {/* <h2 className="text-3xl sm:text-4xl font-semibold text-teal-50 leading-snug">
                 Welcome to <span className="text-emerald-200 font-bold font-['Inter']">MatBuddy</span>
             </h2> */}
-            <p className="mt-2 text-lg sm:text-xl text-teal-100 font-light">
+            <p className="mt-2 text-md sm:text-md text-teal-100 font-light">
                 Your AI assistant for exploring and generating material structures
                 <br></br>
                 Powered by{' '}
@@ -57,7 +57,7 @@ function Home() {
             >
                 {count} {count === 1 ? "like" : "likes"}
             </button>
-            <p className="mt-4 text-base font-medium">
+            <p className="mt-4 text-base text-xs font-medium">
                 Start generating materials or retrieve existing structures using the sidebar!
             </p>
             </div>
