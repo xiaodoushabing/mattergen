@@ -24,9 +24,11 @@ function NavLink({ to, children }) {
 }
 
 function App() {
+  const location = useLocation();
+  const isRetrieve = location.pathname === "/retrieve";
 
   return (
-    <div className="w-screen h-screen flex bg-zinc-100 text-zinc-900">
+    <div className="w-screen h-screen flex overflow-hidden">
       {/* Sidebar */}
       <aside className="w-72 bg-green-100 text-zinc-800 shadow-[0_4px_20px_rgba(0,0,0,0.5)] p-10 flex flex-col justify-between">
         <div>
@@ -46,7 +48,7 @@ function App() {
           {/* Sidebar Navigation */}
           <nav className="space-y-4">
             <NavLink to="/generate">Generate</NavLink>
-            <NavLink to="/retrieve">Retrieve</NavLink>
+            <NavLink to="/retrieve">Retrieve by Filters</NavLink>
             <NavLink to="/download">Download</NavLink>
           </nav>
         </div>
@@ -57,11 +59,14 @@ function App() {
       </aside>
 
       {/* Main Content */}
-      <main
-        className="relative flex-1 flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+      <div
+        className="relative flex-1 flex flex-col items-center justify-center p-10 bg-cover bg-center bg-no-repeat bg-fixed"
         style={{ backgroundImage: `url(${backgroundImage})` }}
         >
         <div className="absolute inset-0 bg-black opacity-75 z-0"></div>
+      <main
+        className={`h-full overflow-y-auto relative z-10 p-10 flex flex-col items-center ${isRetrieve ? 'justify-start' : 'justify-center'} w-full`}
+        >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/generate" element={<GenerateLattice />} />
@@ -69,6 +74,7 @@ function App() {
           <Route path="/retrieve" element={<RetrieveLattice />} />
         </Routes>
       </main>
+      </div>
     </div>
   );
 }

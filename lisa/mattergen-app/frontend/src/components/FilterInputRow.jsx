@@ -2,7 +2,6 @@ function FilterInputRow({ fieldConfig, filterState, onChange, isLoading }) {
     const { name, label, numberType, placeholder, min } = fieldConfig;
     const { value, op } = filterState;
 
-    // Valid operator options
     const opBackendMapping = {
         '=': 'eq',
         '!=': 'neq',
@@ -13,7 +12,7 @@ function FilterInputRow({ fieldConfig, filterState, onChange, isLoading }) {
     };
 
     const opOptions = Object.keys(opBackendMapping);
-
+    
     // Don't show operator for Limit field
     const showOperator = name !== 'Limit';
 
@@ -40,8 +39,9 @@ function FilterInputRow({ fieldConfig, filterState, onChange, isLoading }) {
                         disabled={isLoading}
                     >
                         {opOptions.map(option => (
-                            // <option key="=" value="eq">=</option>
-                            <option key={option} value={opBackendMapping[option]}>
+                            // <option key="=" value="=">=</option>
+                            // value is what's sent to backend
+                            <option key={option} value={option}>
                                 {option}
                             </option>
                         ))}
@@ -49,10 +49,11 @@ function FilterInputRow({ fieldConfig, filterState, onChange, isLoading }) {
                 )}
                 {/* Value Input */}
                 <input
-                    type={'number'}
+                    type={"number"}
                     id={`${name}-value`}
                     name={`${name}-value`}
                     value={value}
+                    step={numberType === 'integer' ? '1' : 'any'}
                     onChange={(e) => onChange(name, 'value', e.target.value)}
                     placeholder={placeholder}
                     min={min}

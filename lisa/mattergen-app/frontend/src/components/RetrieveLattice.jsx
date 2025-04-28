@@ -8,22 +8,30 @@ const API = "http://localhost:8000"
 function RetrieveLattice () {
     // Define configuration for each filter field
     const filterFieldsConfig = [
-    { name: 'Limit', label: 'limit', defaultOp: 'eq', defaultValue: '10', placeholder: 'e.g., 10', numberType: 'integer', min: 1 },
-    { name: 'LatticeIndex', label: 'latticeIndex', defaultOp: 'eq', defaultValue: '', placeholder: 'e.g., 5', numberType: 'integer', min: 1 },
-    { name: 'GuidanceFactor', label: 'guidanceFactor', defaultOp: 'eq', defaultValue: '', placeholder: 'e.g., 4.0', numberType: 'float', min: 1 },
-    { name: 'MagneticDensity', label: 'magneticDensity', defaultOp: 'eq', defaultValue: '', placeholder: 'e.g., 0.5', numberType: 'float', min: 0 },
-    { name: 'NoOfAtoms', label: 'numberOfAtoms', defaultOp: 'eq', defaultValue: '', placeholder: 'e.g., 12', numberType: 'integer', min: 1 },
-    { name: 'Energy', label: 'energy', defaultOp: 'eq', defaultValue: '', placeholder: 'e.g., -330.9', numberType: 'float' },
+    { name: 'Limit', label: 'limit', defaultOp: '=', defaultValue: '10', placeholder: 'e.g., 10', numberType: 'integer', min: 1 },
+    { name: 'LatticeIndex', label: 'latticeIndex', defaultOp: '=', defaultValue: '', placeholder: 'e.g., 5', numberType: 'integer', min: 1 },
+    { name: 'GuidanceFactor', label: 'guidanceFactor', defaultOp: '=', defaultValue: '', placeholder: 'e.g., 4.0', numberType: 'float', min: 1 },
+    { name: 'MagneticDensity', label: 'magneticDensity', defaultOp: '=', defaultValue: '', placeholder: 'e.g., 0.5', numberType: 'float', min: 0 },
+    { name: 'NoOfAtoms', label: 'numberOfAtoms', defaultOp: '=', defaultValue: '', placeholder: 'e.g., 12', numberType: 'integer', min: 1 },
+    { name: 'Energy', label: 'energy', defaultOp: '=', defaultValue: '', placeholder: 'e.g., -330.9', numberType: 'float' },
 ];
 
-    // Valid operator options
-    const opOptions = ["eq", "neq", "lt", "gt", "lte", "gte"];
+    const opBackendMapping = {
+            '=': 'eq',
+            '!=': 'neq',
+            '<': 'lt',
+            '<=': 'lte',
+            '>': 'gt',
+            '>=': 'gte'
+        };
+
+    const opOptions = Object.keys(opBackendMapping);
 
     const [filters, setFilters] = useState(() => {
         const initialState = {};
         filterFieldsConfig.forEach(field => {
             initialState[field.name] = {
-                operator: field.defaultOp,
+                op: field.defaultOp,
                 value: field.defaultValue,
             };
         });
@@ -103,13 +111,14 @@ function RetrieveLattice () {
             const filterType = field.numberType;
 
             if (!opOptions.includes(filterOp)) {
-                setError(`Invalid operator for ${field.label}.`);
+                const invalidLabel = field.label.replace(/([A-Z])/g, ' $1').trim();
+                setError(`Invalid operator "${filterOp}" selected for ${invalidLabel}. Please choose a valid operator from the list.`);
                 setIsLoading(false);
                 return;
             }
 
             if (filterValue) {
-                valueNum = (filterType === 'float') ? parseFloat(filterValue) : parseInt(filterValue);
+                const valueNum = (filterType === 'float') ? parseFloat(filterValue) : parseInt(filterValue);
 
                 if (isNaN(valueNum)) {
                     setError(`${key.replace(/([A-Z])/g, ' $1').trim()} must be a valid ${filterType}.`);
@@ -123,9 +132,18 @@ function RetrieveLattice () {
                      return;
                 }
 
+                if (field.name === 'Limit') {
+                    requestPayload.limit = valueNum;
+                    return;
+                }
                 // map state key to backend snakecase format
+                const backendOpCode = opBackendMapping[filterOp];
+                if (!backendOpCode) { // Should not happen if operator validation passed
+                     validationError = `Internal error mapping operator "${filterOp}".`; return;
+                }
+
                 const apiFieldName = field.name.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '');
-                requestPayload[apiFieldName] = { value: valueNum, op: filterOp};
+                requestPayload[apiFieldName] = { value: valueNum, op: backendOpCode };
             }
         })
 
@@ -172,7 +190,7 @@ function RetrieveLattice () {
     return (
         <div className="relative z-10 p-8 bg-slate-50 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-2xl w-full mx-auto">
         <h2 className=" relative z-10 text-3xl font-semibold text-slate-800 mb-10 mt-5 text-center">
-            Retrieve Lattices
+            Retrieve Lattices by Filters
         </h2>
 
             {/* Form */}
@@ -190,10 +208,10 @@ function RetrieveLattice () {
 
                 {/* Atoms List Input (Separate) */}
                 <div>
-                    <label htmlFor="atomsList" className="block text-lg font-medium text-gray-700">
-                        Atoms List (Optional)
+                    <label htmlFor={`atomsList`} className="block text-md font-semibold text-emerald-700 mb-1">
+                        Atoms List
                     </label>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="text-xs text-gray-500 mb-1">
                         Filter by elements present. Enter symbols separated by commas (e.g., Fe, O, Pt).
                     </p>
                     <input
@@ -208,50 +226,85 @@ function RetrieveLattice () {
                 </div>
 
                 {/* Submit Button */}
-                <div className="pt-4"> {/* Added padding top */}
+                <div className="flex justify-center"> {/* Added padding top */}
                     <button
                         type="submit"
-                        className={`w-full px-4 py-3 text-white font-semibold rounded-lg transition duration-200 ease-in-out text-base ${
+                        className={`bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-700 hover:to-teal-600 text-stone-100 font-bold text-lg py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 ease-in-out ${
                         isLoading
-                            ? 'bg-gray-400 cursor-not-allowed'
-                            : 'bg-emerald-600 hover:bg-emerald-700'
-                        }`}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? 'Retrieving...' : 'Retrieve Lattices'}
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-teal-800 hover:bg-emerald-700'
+                    }`}
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Retrieving lattices...' : 'Retrieve Lattices'}
                     </button>
                 </div>
             </form>
 
             {/* Feedback Messages */}
-            {/* ... (message and error display remains the same) ... */}
-             {message && !error && ( // Show message only if no error
-                <div className="mt-6 p-4 bg-blue-100 text-blue-800 border border-blue-200 rounded-lg text-sm">
+            {message && (
+                <div className="mt-4 p-3 bg-green-100 text-green-800 border border-green-200 rounded-md text-sm">
                 {message}
                 </div>
             )}
             {error && (
-                <div className="mt-6 p-4 bg-red-100 text-red-800 border border-red-200 rounded-lg text-sm">
+                <div className="mt-4 p-3 bg-red-100 text-red-800 border border-red-200 rounded-md text-sm">
                 {error}
                 </div>
             )}
 
 
             {/* Results Display */}
-            {/* ... (results display logic remains the same) ... */}
-             <div className="mt-8">
+            <div className="mt-8">
                 {results.length > 0 && (
-                    <h3 className="text-xl font-semibold text-slate-700 mb-4">Results:</h3>
+                    <h3 className="text-2xl font-bold text-slate-700 mb-6">
+                        Results:
+                    </h3>
                 )}
                 <div className="space-y-4">
                     {results.map((lattice) => (
-                        <div key={lattice.id} className="p-4 border border-gray-200 rounded-md bg-gray-50 text-sm">
-                            <p><strong>ID:</strong> {lattice.id}</p>
-                            <p><strong>Index:</strong> {lattice.lattice_index}, <strong>Atoms:</strong> {lattice.no_of_atoms}, <strong>Elements:</strong> {Object.keys(lattice.atoms_list).join(', ')}</p>
-                            {lattice.ms_predictions?.energy && (
-                                <p><strong>Energy:</strong> {lattice.ms_predictions.energy.toFixed(4)}</p>
-                            )}
-                            {/* Add more fields as needed */}
+                        <div
+                            key={lattice._id}
+                            className="p-4 border border-gray-200 rounded-lg bg-gray-100 flex justify-between items-start text-sm"
+                        >
+                            {/* Main Content Area (takes available space on the left) */}
+                            <div>
+                                <p className="mb-1">
+                                    <strong>Number of atoms:</strong> {lattice.no_of_atoms},{' '}
+                                </p>
+                                <p className="mb-1">
+                                <strong>Elements:</strong>{' '}
+                                {Object.entries(lattice.atoms_list) // Get [key, value] pairs
+                                    .map(([element, count], index, arr) => (
+                                        <span key={element}>
+                                            <span className="font-semibold text-emerald-700">{element}</span>
+                                            :{' '}
+                                            <span className="text-gray-600">{count}</span>
+                                            {index < arr.length - 1 ? ', ' : ''}
+                                        </span>
+                                    ))
+                                }
+                                </p>
+                                <p className="mb-1">
+                                    <strong>Guidance Factor:</strong> {lattice.guidance_factor}
+                                </p>
+                                <p className="mb-1">
+                                    <strong>Magnetic Density:</strong> {lattice.magnetic_density}
+                                </p>
+                                {lattice.ms_predictions?.energy && (
+                                    <p><strong>Energy:</strong> {lattice.ms_predictions.energy.toFixed(2)}</p>
+                                )}
+                            </div>
+
+                            {/* ID and Index Area (pushed to the top right) */}
+                            <div className="text-right text-xs text-gray-500 ml-4">
+                                <p className="font-semibold mb-1">
+                                    ID: {lattice._id}
+                                </p>
+                                <p>
+                                    Index: {lattice.lattice_index}
+                                </p>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -267,14 +320,14 @@ function RetrieveLattice () {
                             }`}
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Loading...' : 'Load More'}
+                            {isLoading ? 'Fetching...' : 'Load More'}
                         </button>
                     </div>
                 )}
             </div>
 
 
-        </div> // Closing main container div
+        </div>
     );
 }
 
