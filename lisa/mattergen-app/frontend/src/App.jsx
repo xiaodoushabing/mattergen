@@ -48,7 +48,7 @@ function App() {
           {/* Sidebar Navigation */}
           <nav className="space-y-4">
             <NavLink to="/generate">Generate</NavLink>
-            <NavLink to="/retrieve">Retrieve by Filters</NavLink>
+            <NavLink to="/retrieve">Retrieve</NavLink>
             <NavLink to="/download">Download</NavLink>
           </nav>
         </div>
