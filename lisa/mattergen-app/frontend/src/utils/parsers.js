@@ -1,3 +1,5 @@
+import { data } from "react-router-dom";
+
 //helper for download
 export const parseLatticeStr = (inputStr) => {
     const parsedInput = inputStr
@@ -8,40 +10,43 @@ export const parseLatticeStr = (inputStr) => {
     // MongoDB ObjectId validation
     const invalidInstances = parsedInput.filter(s => !latticeRegex.test(s));
     if (invalidInstances.length > 0) {
-        setError(`Invalid input: ${invalidInstances.join(', ')}. All values must be 24-character hexadecimal strings.`);
-        return null;
+        return {
+            data: null,
+            error: `Invalid input: ${invalidInstances.join(', ')}. All values must be 24-character hexadecimal strings.`
+        };
     }
-    return parsedInput
+    return  { data: parsedInput, error: null }
 };
 
 export const parseFilenameStr = (inputStr) => {
     const trimmed = inputStr.trim();
-    // Allow alphanumerics, underscores, dashes, and dots (no slashes or illegal chars)
     const filenameRegex = /^[\w\-\_]+$/;
-    if (!filenameRegex.test(inputStr)) {
-        setError('Invalid filename. Use only letters, numbers, dashes or underscores. Special characters, periods and spaces are not allowed.');
-        return null;
-}
-    return trimmed;
-}
+    if (!filenameRegex.test(trimmed)) {
+        return {
+            data: null,
+            error: 'Invalid filename. Use only letters, numbers, dashes or underscores. Special characters, periods and spaces are not allowed.'
+        };
+    }
+    return { data: trimmed, error: null };
+};
 
-//helper for generate
 export const parseNumberList = (inputStr, fieldName) => {
     const parsedInput = inputStr
-                            .split(',')
-                            .map(s => s.trim())
-                            .filter(s => s !== '')
-                            .map(Number);
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s !== '')
+        .map(Number);
 
     const hasInvalid = parsedInput.some(n => isNaN(n));
     if (hasInvalid) {
-        setError(`Invalid input in ${fieldName}: All values must be numbers.`);
-        return null;
+        return {
+            data: null,
+            error: `Invalid input in ${fieldName}: All values must be numbers.`
+        };
     }
-    return parsedInput
+    return { data: parsedInput, error: null };
 };
 
-//helper for retrieve by filter
 export const parseAtomsList = (inputStr) => {
     const parsedInput = inputStr
         .split(',')
@@ -50,9 +55,12 @@ export const parseAtomsList = (inputStr) => {
 
     const atomsRegex = /^[a-zA-Z]{1,2}$/;
     const invalidAtoms = parsedInput.filter(s => !atomsRegex.test(s));
+
     if (invalidAtoms.length > 0) {
-        setError(`Invalid atom symbols: ${invalidAtoms.join(", ")}. Each must be 1–2 letters.`);
-        return null;
+        return {
+            data: null,
+            error: `Invalid atom symbols: ${invalidAtoms.join(', ')}. Each must be 1–2 letters.`
+        };
     }
-    return parsedInput
-}
+    return { data: parsedInput, error: null };
+};

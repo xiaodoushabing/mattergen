@@ -18,9 +18,14 @@ function RetrieveLatticeById() {
         setMessage('');
         setError('');
 
-        const latticeIdParsed = parseLatticeStr(latticeId);
-
+        const { data: latticeIdParsed, error: latticeIdError } = parseLatticeStr(latticeId);
         //validate inputs
+        if (latticeIdError) {
+            setError(latticeIdError);
+            setIsLoading(false);
+            return;
+        }
+        
         if (!latticeIdParsed) {
             setIsLoading(false);
             return;

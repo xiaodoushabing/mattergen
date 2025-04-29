@@ -19,10 +19,16 @@ function DownloadLattice () {
         setMessage('');
         setError('');
 
-        const latticeIdsParsed = parseLatticeStr(latticeIds);
-        const filenameParsed = parseFilenameStr(filename);
+        const { data: latticeIdsParsed, error: latticeIdsError } = parseLatticeStr(latticeIds);
+        const { data: filenameParsed, error: filenameError } = parseFilenameStr(filename);
 
         //validate inputs
+        if (latticeIdsError) {
+            setError(latticeIdsError);
+            setIsLoading(false);
+            return;
+        } 
+        
         if (!latticeIdsParsed) {
             setIsLoading(false);
             return;
@@ -32,6 +38,11 @@ function DownloadLattice () {
             return;
         }
 
+        if (filenameError) {
+            setError(filenameError);
+            setIsLoading(false);
+            return;
+        }
         if (!filenameParsed) {
             setIsLoading(false);
             return;

@@ -20,11 +20,17 @@ function GenerateLattice () {
         setMessage('');
         setError('');
 
-        const magneticDensity = parseNumberList(magneticDensityStr, "Magnetic Density");
-        const guidanceFactor = parseNumberList(guidanceFactorStr, "Guidance Factor");
+        const { data: magneticDensity, error: magneticDensityError } = parseNumberList(magneticDensityStr, "Magnetic Density");
+        const { data: guidanceFactor, error: guidanceFactorError } = parseNumberList(guidanceFactorStr, "Guidance Factor");
         const batchSize = parseInt(batchSizeStr, 10);
+ 
 
         //validate inputs
+        if (magneticDensityError) {
+            setError(magneticDensityError);
+            setIsLoading(false);
+            return;
+        }
         if (!magneticDensity) {
             setIsLoading(false);
             return;
@@ -38,6 +44,11 @@ function GenerateLattice () {
             return;
         }
 
+        if (guidanceFactorError) {
+            setError(guidanceFactorError);
+            setIsLoading(false);
+            return;
+        }
         if (!guidanceFactor) {
             setIsLoading(false);
             return;

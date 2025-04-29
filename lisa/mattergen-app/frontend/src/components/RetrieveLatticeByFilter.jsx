@@ -83,7 +83,14 @@ function RetrieveLatticeByFilter () {
             limit: parseInt(filters.Limit.value),
         };
         
-        const atoms_list = parseAtomsList(filters.AtomsList)
+        const { data: atoms_list, error: atomsError } = parseAtomsList(filters.AtomsList);
+
+        if (atomsError) {
+            setError(atomsError);
+            setIsLoading(false);
+            return;
+        }
+        
         if (atoms_list && atoms_list.length > 0) {
             requestPayload.atoms_list = atoms_list;
         }
