@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import FilterInputRow from "./FilterInputRow";
+import FilterInputRow from "./FilterInputRow"
+import { parseAtomsList } from "../utils/parsers";
 
 // const API = import.meta.env.VITE_API_URL;
 const API = "http://localhost:8000"
@@ -40,7 +41,6 @@ function RetrieveLatticeByFilter () {
         return initialState;
     });
 
-
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -64,22 +64,6 @@ function RetrieveLatticeByFilter () {
             AtomsList: value
         }));
     };
-
-    // validate atoms list
-    const parseAtomsList = (inputStr) => {
-        const parsedInput = inputStr
-            .split(',')
-            .map(s => s.trim())
-            .filter(s => s !== '');
-
-        const atomsRegex = /^[a-zA-Z]{1,2}$/;
-        const invalidAtoms = parsedInput.filter(s => !atomsRegex.test(s));
-        if (invalidAtoms.length > 0) {
-            setError(`Invalid atom symbols: ${invalidAtoms.join(", ")}. Each must be 1–2 letters.`);
-            return null;
-        }
-        return parsedInput
-    }
 
     const handleSubmit = async (e, loadMore = false) => {
         e.preventDefault();
@@ -188,7 +172,7 @@ function RetrieveLatticeByFilter () {
     };
 
     return (
-        <div className="relative z-10 p-8 bg-slate-50 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-2xl w-full mx-auto">
+        <div className="relative z-10 p-8 bg-slate-50 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-3xl w-full mx-auto">
         {/* <h2 className="relative z-10 text-3xl font-semibold text-slate-800 mb-10 mt-5 text-center">
             Retrieve Lattices by Filters
         </h2> */}

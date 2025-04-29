@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { parseFilenameStr, parseLatticeStr } from "../utils/parsers";
 
 // const API = import.meta.env.VITE_API_URL;
 const API = "http://localhost:8000"
@@ -11,32 +12,6 @@ function DownloadLattice () {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
-    const parseLatticeStr = (inputStr) => {
-        const parsedInput = inputStr
-                                .split(',')
-                                .map(s => s.trim())
-                                .filter(s => s !== '')
-        const latticeRegex = /^[0-9a-fA-F]{24}$/;
-        // MongoDB ObjectId validation
-        const invalidInstances = parsedInput.filter(s => !latticeRegex.test(s));
-        if (invalidInstances.length > 0) {
-            setError(`Invalid input: ${invalidInstances.join(', ')}. All values must be 24-character hexadecimal strings.`);
-            return null;
-        }
-        return parsedInput
-    };
-
-    const parseFilenameStr = (inputStr) => {
-        const trimmed = inputStr.trim();
-        // Allow alphanumerics, underscores, dashes, and dots (no slashes or illegal chars)
-        const filenameRegex = /^[\w\-\_]+$/;
-        if (!filenameRegex.test(inputStr)) {
-            setError('Invalid filename. Use only letters, numbers, dashes or underscores. Special characters, periods and spaces are not allowed.');
-            return null;
-    }
-        return trimmed;
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();

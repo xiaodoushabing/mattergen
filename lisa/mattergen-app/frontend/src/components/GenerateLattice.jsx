@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import axios from "axios";
+import { parseNumberList } from "../utils/parsers";
 
 // const API = import.meta.env.VITE_API_URL;
 const API = "http://localhost:8000"
@@ -13,24 +14,8 @@ function GenerateLattice () {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    //define helper function to parse input strings
-    const parseNumberList = (inputStr, fieldName) => {
-        const parsedInput = inputStr
-                                .split(',')
-                                .map(s => s.trim())
-                                .filter(s => s !== '')
-                                .map(Number);
-
-        const hasInvalid = parsedInput.some(n => isNaN(n));
-        if (hasInvalid) {
-            setError(`Invalid input in ${fieldName}: All values must be numbers.`);
-            return null;
-        }
-        return parsedInput
-    };
-
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent default browser form submission (page reload)
+        e.preventDefault();
         setIsLoading(true);
         setMessage('');
         setError('');
