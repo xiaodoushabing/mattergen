@@ -4,8 +4,6 @@ import RetrieveLatticeById from './RetrieveLatticeById';
 
 function RetrieveLattice() {
     const [retrievalMethod, setRetrievalMethod] = useState("filter"); // Default to 'filter'
-
-    console.log("Current retrievalMethod:", retrievalMethod);
     
     return (
         <>

@@ -171,6 +171,13 @@ function RetrieveLatticeByFilter () {
         }
     };
 
+    const InfoField = ({ label, value }) => (
+        <p className="mb-1">
+            <strong>{label}</strong>
+            <span className="block ml-4 text-gray-700">{value}</span>
+        </p>
+    );
+
     return (
         <div className="relative z-10 p-8 bg-slate-50 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-stone-200 max-w-3xl w-full mx-auto">
         {/* <h2 className="relative z-10 text-3xl font-semibold text-slate-800 mb-10 mt-5 text-center">
@@ -253,30 +260,24 @@ function RetrieveLatticeByFilter () {
                         >
                             {/* Main Content Area (takes available space on the left) */}
                             <div>
-                                <p className="mb-1">
-                                    <strong>Number of atoms:</strong> {lattice.no_of_atoms},{' '}
-                                </p>
-                                <p className="mb-1">
-                                <strong>Elements:</strong>{' '}
-                                {Object.entries(lattice.atoms_list) // Get [key, value] pairs
-                                    .map(([element, count], index, arr) => (
-                                        <span key={element}>
-                                            <span className="font-semibold text-emerald-700">{element}</span>
-                                            :{' '}
-                                            <span className="text-gray-600">{count}</span>
-                                            {index < arr.length - 1 ? ', ' : ''}
-                                        </span>
-                                    ))
-                                }
-                                </p>
-                                <p className="mb-1">
-                                    <strong>Guidance Factor:</strong> {lattice.guidance_factor}
-                                </p>
-                                <p className="mb-1">
-                                    <strong>Magnetic Density:</strong> {lattice.magnetic_density}
-                                </p>
+                                <InfoField label="Number of atoms:" value={lattice.no_of_atoms} />
+                                <InfoField label="Elements:" value=
+                                    {Object.entries(lattice.atoms_list) // Get [key, value] pairs
+                                        .map(([element, count], index, arr) => (
+                                            <span key={element}>
+                                                <span className="font-semibold text-emerald-700">{element}</span>
+                                                :{' '}
+                                                <span className="text-gray-600">{count}</span>
+                                                {index < arr.length - 1 ? ', ' : ''}
+                                            </span>
+                                        ))
+                                    } />
+                                
+                                <InfoField label="Guidance Factor:" value={lattice.guidance_factor} />
+                                <InfoField label="Magnetic Density:" value={lattice.magnetic_density} />
+                                 
                                 {lattice.ms_predictions?.energy && (
-                                    <p><strong>Energy:</strong> {lattice.ms_predictions.energy.toFixed(2)}</p>
+                                    <InfoField label="Energy:" value={lattice.ms_predictions.energy.toFixed(2)} />
                                 )}
                             </div>
 
