@@ -24,7 +24,10 @@ def connect_to_mongo():
     """
     try: 
         logger.debug(f"Connecting to MongoDB at {settings.mongo_host}:{settings.mongo_port} in database {settings.db_name}, collection {settings.collection_name}...")
-        client = MongoClient(f"mongodb://{settings.mongo_host}:{settings.mongo_port}/")
+        client = MongoClient(f"mongodb://{settings.mongo_host}:{settings.mongo_port}/", serverSelectionTimeoutMS=5000)
+        logger.debug("Pinging MongoDB server to verify connection...")
+        client.admin.command('ping')
+        logger.info("Successfully verified connection to MongoDB.")
         db = client[settings.db_name]
         lattice_collection = db[settings.collection_name]
         logger.info("Successfully connected to MongoDB.")
