@@ -1,39 +1,66 @@
 version: '3.8'
 
 services:
-  db:
-    image: mongo:8.0.5
-    ports:
-      - "${HOST_MONGO_PORT}:27017"
-    environment:
-      # MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-      # MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
-      MONGO_INITDB_DATABASE: ${DB_NAME} # This can create the DB on init
-    volumes:
-      - mongo_data:/data/db # Default data directory for MongoDB
+  # New MongoDB service
+  # db:
+  #   image: mongo:8.0.5
+  #   container_name: mongo
+  #   ports:
+  #     - "${HOST_MONGO_PORT}:27017"
+  #   environment:
+  #     # MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+  #     # MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+  #     MONGO_INITDB_DATABASE: ${DB_NAME} # This can create the DB on init
+  #   volumes:
+  #     - mongo_data:/data/db # Default data directory for MongoDB
+
+  # Configuration to use an existing MongoDB external container
+  # Docker Compose will NOT start or stop this 'mongo' container.
+  # It assumes 'mongo' is already running and accessible on a network
+  # that the 'backend' service can join or reach.
+  mongo:
+    image: mongo:8.0.5 # Image is specified for completeness but won't be used to create a new container if external=true
+    container_name: mongo # IMPORTANT: This should match the ACTUAL NAME of your existing, running MongoDB container.
+    external: true
 
   backend:
     build: ./backend
     ports:
-      - "${HOST_BACKEND_PORT}:8080"
+      - "${HOST_BACKEND_PORT}:{CONTAINER_BACKEND_PORT}"
     env_file:
-      - ./backend/.env # Loads environment variables from backend/.env
+      - ./backend/.env  # Loads app-specific variables for the backend
     depends_on:
       - db
     volumes:
       - ./backend:/usr/src/app
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
     ports:
-      - "${HOST_FRONTEND_PORT}:3000"
+      - "${HOST_FRONTEND_PORT}:${CONTAINER_FRONTEND_PORT}"
     env_file:
-      - ./frontend/.env # Loads environment variables from frontend/.env
+      - ./frontend/.env  # Loads app-specific variables for the frontend
     depends_on:
       - backend
     volumes:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
+    networks:
+      - app-network
 
-volumes:
-  mongo_data:
+# use this if you want to use a new MongoDB service
+# Volumes are not defined here if MongoDB is fully external
+# and its data persistence is managed elsewhere.
+# volumes:
+#   mongo_data:
+
+networks:
+  app-network:
+    driver: bridge # Standard bridge network
+  # If your external 'mongo' container is on a specific pre-existing network,
+  # you might need to declare that network as external here too:
+  # existing_mongo_network:
+  #   external: true
+  #   name: name_of_your_existing_mongo_network # Replace with actual name
