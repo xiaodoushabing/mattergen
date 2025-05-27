@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # New MongoDB service
   # db:
@@ -14,40 +12,42 @@ services:
   #   volumes:
   #     - mongo_data:/data/db # Default data directory for MongoDB
 
-  # Configuration to use an existing MongoDB external container
-  # Docker Compose will NOT start or stop this 'mongo' container.
-  # It assumes 'mongo' is already running and accessible on a network
-  # that the 'backend' service can join or reach.
-  mongo:
-    image: mongo:8.0.5 # Image is specified for completeness but won't be used to create a new container if external=true
-    container_name: mongo # IMPORTANT: This should match the ACTUAL NAME of your existing, running MongoDB container.
-    external: true
-    # networks:
-    #   - matbuddy_network # Ensure this matches the network where MongoDB is running
-
   backend:
     build: ./backend
     ports:
-      - "${HOST_BACKEND_PORT}:{CONTAINER_BACKEND_PORT}"
+      # Uncomment the next line when using Docker
+      # - "${HOST_BACKEND_PORT}:{CONTAINER_BACKEND_PORT}"
+      # Comment the next three lines when using Docker
+      - target: ${CONTAINER_BACKEND_PORT}
+        published: ${HOST_BACKEND_PORT}
+        protocol: tcp
     env_file:
       - ./backend/.env  # Loads app-specific variables for the backend
-    depends_on:
-      - db
+    # Uncomment the next line when using new MongoDB service
+    # depends_on:
+    #   - mongo
     volumes:
-      - ./backend:/usr/src/app
+      # - ./backend:/usr/src/app
+      []
     networks:
       - matbuddy_network
 
   frontend:
     build: ./frontend
     ports:
-      - "${HOST_FRONTEND_PORT}:${CONTAINER_FRONTEND_PORT}"
+      # Uncomment the next line when using Docker
+      # - "${HOST_FRONTEND_PORT}:${CONTAINER_FRONTEND_PORT}"
+      # Comment the next three lines when using Docker
+      - target: ${CONTAINER_FRONTEND_PORT}
+        published: ${HOST_FRONTEND_PORT}
+        protocol: tcp
+      
     env_file:
       - ./frontend/.env  # Loads app-specific variables for the frontend
     depends_on:
       - backend
     volumes:
-      - ./frontend:/usr/src/app
+      # - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
     networks:
       - matbuddy_network

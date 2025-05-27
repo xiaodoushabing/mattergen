@@ -17,7 +17,8 @@ export default defineConfig({
     // setup proxy only for development
     proxy: {        // configure proxy to backend if backend runs on different port
       '/api': {
-        target: 'http://localhost:8000', // your backend server
+        // target: 'http://localhost:8000', // your backend server
+        target: 'http://backend:8000', // your backend server in Docker
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
