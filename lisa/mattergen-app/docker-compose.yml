@@ -6,7 +6,7 @@ services:
   #   image: mongo:8.0.5
   #   container_name: mongo
   #   ports:
-  #     - "${HOST_MONGO_PORT}:27017"
+  #     - "${HOST_BACKEND_PORT}:{CONTAINER_BACKEND_PORT}"
   #   environment:
   #     # MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
   #     # MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
@@ -22,6 +22,8 @@ services:
     image: mongo:8.0.5 # Image is specified for completeness but won't be used to create a new container if external=true
     container_name: mongo # IMPORTANT: This should match the ACTUAL NAME of your existing, running MongoDB container.
     external: true
+    # networks:
+    #   - matbuddy_network # Ensure this matches the network where MongoDB is running
 
   backend:
     build: ./backend
@@ -34,7 +36,7 @@ services:
     volumes:
       - ./backend:/usr/src/app
     networks:
-      - app-network
+      - matbuddy_network
 
   frontend:
     build: ./frontend
@@ -48,7 +50,7 @@ services:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
     networks:
-      - app-network
+      - matbuddy_network
 
 # use this if you want to use a new MongoDB service
 # Volumes are not defined here if MongoDB is fully external
@@ -57,10 +59,17 @@ services:
 #   mongo_data:
 
 networks:
-  app-network:
-    driver: bridge # Standard bridge network
-  # If your external 'mongo' container is on a specific pre-existing network,
-  # you might need to declare that network as external here too:
-  # existing_mongo_network:
+  # Uncomment to define a new network for your app services
+  # app-network:  # Define a new network for your app services
+  #   driver: bridge # Standard bridge network
+
+  # If using an existing network where MongoDB resides:
+  # existing_mongo_network_name: # Replace with a friendly name for this compose file
   #   external: true
-  #   name: name_of_your_existing_mongo_network # Replace with actual name
+  #   name: actual_name_of_network_mongo_is_on # Get this from Portainer/docker inspect
+
+  matbuddy_network:
+    external: true
+    name: app-network # This is the ACTUAL name of the Docker network on your Docker host.
+                      # This network MUST exist before deploying the stack.
+                      # Your existing Portainer-managed MongoDB container MUST be connected to this 'app-network'.

@@ -1,4 +1,4 @@
-# Use an official Node runtime as a parent image
+# Use an official Nvidia PyTorch runtime as a parent image
 FROM nvcr.io/nvidia/pytorch:24.12-py3
 
 # Set the working directory in the container
