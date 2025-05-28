@@ -1,6 +1,6 @@
 services:
   # New MongoDB service
-  # db:
+  # mongo:
   #   image: mongo:8.0.5
   #   container_name: mongo
   #   ports:
